@@ -1,0 +1,93 @@
+---
+import { company } from '../data/site';
+
+const links = [
+  { href: '/#motivacion', label: 'Por qué' },
+  { href: '/#capacidad', label: 'Capacidad' },
+  { href: '/#demos', label: 'Demos' },
+  { href: '/#guia', label: 'Cómo trabajamos' },
+  { href: '/#equipo', label: 'Equipo' },
+  { href: '/unete', label: 'Únete' },
+];
+---
+
+<header class="nav">
+  <div class="container inner">
+    <a class="brand" href="/#inicio" aria-label={`${company.name}, ir al inicio`}>
+      <span class="mark" aria-hidden="true"></span>
+      {company.name}
+    </a>
+    <nav aria-label="Secciones">
+      <ul>
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+    <a class="btn btn-primary cta" href="/#contacto">Conversemos</a>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--hero-bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+    color: var(--hero-ink);
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 64px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent) 0 55%, var(--sand) 55%);
+  }
+  nav {
+    margin-left: auto;
+  }
+  ul {
+    display: flex;
+    gap: 22px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    color: var(--hero-ink-2);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  nav a:hover {
+    color: var(--hero-ink);
+  }
+  .cta {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+  @media (max-width: 1060px) {
+    nav {
+      display: none;
+    }
+    .cta {
+      margin-left: auto;
+    }
+  }
+</style>

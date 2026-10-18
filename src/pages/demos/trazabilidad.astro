@@ -1,0 +1,222 @@
+---
+import DemoLayout from '../../layouts/DemoLayout.astro';
+import { shipments } from '../../data/demos/trazabilidad';
+---
+
+<DemoLayout
+  slug="trazabilidad"
+  intro="Sigue una carga punto por punto: quién la recibió, dónde, cuándo y con qué documento. Cada registro lleva un sello encadenado al anterior, así que si alguien altera un dato pasado, la cadena lo delata."
+  real={[
+    'Escaneo de un código QR en cada punto desde el celular, con foto y documento adjunto.',
+    'Funciona sin señal en ruta y sincroniza al recuperarla.',
+    'Alertas automáticas a quien despacha y a quien recibe cuando hay diferencias o atrasos.',
+    'Sellos guardados fuera del alcance de quien registra, para que la cadena sea verificable por terceros.',
+  ]}
+>
+  <div class="demo-grid traza" data-traza>
+    <div class="card panel">
+      <label class="field">
+        Carga
+        <select data-shipment>
+          {shipments.map((s, i) => <option value={i}>{`${s.code} · ${s.description}`}</option>)}
+        </select>
+      </label>
+      <p class="note" data-route></p>
+      <div class="actions">
+        <button type="button" class="btn btn-primary btn-sm" data-scan>Escanear siguiente punto</button>
+        <button type="button" class="btn btn-sm" data-all>Ver todo el recorrido</button>
+      </div>
+      <div class="tamper">
+        <h2>Prueba la integridad</h2>
+        <p class="note">Simula que alguien cambia el peso del despacho después de registrado.</p>
+        <button type="button" class="btn btn-sm" data-tamper>Alterar el primer registro</button>
+      </div>
+      <div class="alerts" data-alerts aria-live="polite"></div>
+    </div>
+
+    <div class="card panel">
+      <h2>Cadena de custodia</h2>
+      <ol class="chain" data-chain></ol>
+    </div>
+  </div>
+</DemoLayout>
+
+<script>
+  import { shipments, weightTolerance, type TraceEvent } from '../../data/demos/trazabilidad';
+
+  const root = document.querySelector<HTMLElement>('[data-traza]')!;
+  const select = root.querySelector<HTMLSelectElement>('[data-shipment]')!;
+  const chainEl = root.querySelector<HTMLElement>('[data-chain]')!;
+  const alertsEl = root.querySelector<HTMLElement>('[data-alerts]')!;
+  const scanBtn = root.querySelector<HTMLButtonElement>('[data-scan]')!;
+  const tamperBtn = root.querySelector<HTMLButtonElement>('[data-tamper]')!;
+
+  let events: TraceEvent[] = [];
+  let sealed: string[] = []; // sellos calculados al registrar (los "originales")
+  let shown = 1;
+  let tampered = false;
+
+  // Sello = SHA-256 del registro + sello anterior (cadena tipo hash chain), real en el navegador.
+  async function seal(ev: TraceEvent, prev: string) {
+    const data = new TextEncoder().encode(JSON.stringify(ev) + prev);
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  async function sealAll(list: TraceEvent[]) {
+    const out: string[] = [];
+    for (const ev of list) out.push(await seal(ev, out[out.length - 1] ?? 'origen'));
+    return out;
+  }
+
+  async function load() {
+    const s = shipments[Number(select.value)];
+    events = s.events.map((e) => ({ ...e }));
+    sealed = await sealAll(events);
+    shown = 1;
+    tampered = false;
+    root.querySelector('[data-route]')!.textContent = s.route;
+    await render();
+  }
+
+  async function render() {
+    const current = await sealAll(events);
+    const visible = events.slice(0, shown);
+    const alerts: string[] = [];
+
+    chainEl.innerHTML = visible
+      .map((ev, i) => {
+        const ok = current[i] === sealed[i];
+        const prev = events[i - 1];
+        const diff = prev ? Math.abs(ev.weightKg - prev.weightKg) / prev.weightKg : 0;
+        if (diff > weightTolerance) {
+          alerts.push(`Diferencia de peso en ${ev.place}: ${prev!.weightKg} kg → ${ev.weightKg} kg (${Math.round(diff * 100)}%).`);
+        }
+        return `<li class="${ok ? '' : 'broken'} ${diff > weightTolerance ? 'diff' : ''}">
+          <div class="ev-head"><strong>${ev.action}</strong><span class="mono when">${ev.at}</span></div>
+          <p>${ev.place} · ${ev.actor}</p>
+          <p class="mono meta">📎 ${ev.doc} · ${ev.weightKg} kg</p>
+          <p class="mono seal">${ok ? '🔒 sello' : '⚠ sello no coincide'} ${current[i].slice(0, 16)}…</p>
+        </li>`;
+      })
+      .join('');
+
+    if (tampered) {
+      const broken = current.filter((h, i) => h !== sealed[i] && i < shown).length;
+      alerts.unshift(
+        `Se alteró el primer registro: ${broken} sello${broken === 1 ? '' : 's'} ya no coincide${broken === 1 ? '' : 'n'}. La alteración se detecta aunque los datos se vean normales.`,
+      );
+    }
+    alertsEl.innerHTML = alerts.length
+      ? alerts.map((a) => `<p class="alert">⚠ ${a}</p>`).join('')
+      : shown === events.length
+        ? '<p class="alert ok">✓ Recorrido completo, sin diferencias y con todos los sellos íntegros.</p>'
+        : '';
+    scanBtn.disabled = shown >= events.length;
+    tamperBtn.disabled = tampered;
+  }
+
+  scanBtn.addEventListener('click', () => {
+    shown = Math.min(shown + 1, events.length);
+    render();
+  });
+  root.querySelector('[data-all]')!.addEventListener('click', () => {
+    shown = events.length;
+    render();
+  });
+  tamperBtn.addEventListener('click', () => {
+    events[0] = { ...events[0], weightKg: events[0].weightKg - 40 };
+    tampered = true;
+    render();
+  });
+  select.addEventListener('change', load);
+  load();
+</script>
+
+<style is:global>
+  .traza .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .traza .tamper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .traza .alerts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .traza .chain {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 18px;
+    border-left: 3px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .traza .chain li {
+    position: relative;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--ink-2);
+    animation: appear 0.3s ease-out;
+  }
+  .traza .chain li::before {
+    content: '';
+    position: absolute;
+    left: -27px;
+    top: 16px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--surface);
+  }
+  .traza .chain li.diff {
+    border-color: var(--sand);
+  }
+  .traza .chain li.broken {
+    border-color: var(--bad);
+  }
+  .traza .chain li.broken::before {
+    background: var(--bad);
+  }
+  .traza .ev-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--ink);
+  }
+  .traza .when,
+  .traza .meta {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .traza .seal {
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .traza .broken .seal {
+    color: var(--bad);
+  }
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .traza .chain li {
+      animation: none;
+    }
+  }
+</style>

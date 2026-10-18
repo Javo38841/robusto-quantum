@@ -1,0 +1,760 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import { company } from '../data/site';
+import { cases, board, deliverables, agents, snapshotDate } from '../data/metodo';
+
+const week = [
+  { day: 'Viernes', title: 'Planificación', text: 'Elegimos contigo las historias de la semana y sus criterios de aceptación.' },
+  { day: 'Lunes a jueves', title: 'Construcción', text: 'Cada historia avanza por el tablero: un PR por capa, cada uno con sus pruebas.' },
+  { day: 'Viernes', title: 'Demo y aceptación', text: 'Ves lo nuevo en el ambiente de prueba, aceptas o pides cambios, y queda en el acta.' },
+];
+
+const gitRules = [
+  { title: 'Nada directo a producción', text: 'main y develop solo reciben cambios por Pull Request.' },
+  { title: 'Un PR por capa', text: 'Una historia se entrega en orden: base de datos → backend → frontend.' },
+  { title: 'Ramas y commits con nombre', text: 'feat/, fix/, docs/… y Conventional Commits: el historial se lee como un registro de cambios.' },
+  { title: 'Otra persona aprueba', text: 'Quien escribe un cambio no se lo aprueba: lo revisa otro integrante, con el CI en verde.' },
+];
+
+const aiFlow = [
+  'Una persona escribe los criterios con el Cliente',
+  'El agente escribe primero los tests, con el ID de cada criterio',
+  'Después, el código que los hace pasar',
+  'Entrega una tabla criterio → test → resultado',
+  'Una persona revisa, hace commit y abre el PR',
+  'Otro integrante y el CI aprueban',
+];
+
+// Los agentes que construyen van arriba; los que revisan y apoyan, abajo.
+const builders = agents.slice(0, 3);
+const support = agents.slice(3);
+---
+
+<BaseLayout
+  title={`Método · ${company.name}`}
+  description="Cómo trabajamos: ciclos semanales con Scrum y Kanban, GitFlow, documentación basada en ISO/IEC 29110 e IA con reglas. Con evidencia real."
+>
+  <section class="m-hero">
+    <div class="container">
+      <a class="back mono" href="/#capacidad">← Inicio / Método</a>
+      <h1>Un proceso que puedes verificar, no una promesa.</h1>
+      <p class="intro">
+        Somos un equipo pequeño que trabaja como uno grande: ciclos semanales, cada cambio revisado y probado, documentación
+        basada en ISO/IEC 29110 e inteligencia artificial con reglas claras. Todo lo que ves en esta página sale del proyecto
+        real del LMS.
+      </p>
+    </div>
+  </section>
+
+  <!-- TRAZABILIDAD -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader kicker="Trazabilidad" title="Elige un criterio y sigue su rastro hasta la aceptación.">
+        <p class="lead">
+          Cada cosa que el sistema debe hacer se escribe como un criterio verificable antes de programar. Ese criterio tiene un
+          test con su mismo nombre, un PR que lo entrega, una ejecución del CI y una aceptación del Cliente. Así se ve la cadena
+          con datos reales.
+        </p>
+      </SectionHeader>
+
+      <div class="trace" data-trace>
+        <div class="picker" role="group" aria-label="Elegir criterio">
+          {
+            cases.map((c, i) => (
+              <button type="button" class="btn btn-sm" data-case={i} aria-pressed={i === 0 ? 'true' : 'false'}>
+                {c.id}
+              </button>
+            ))
+          }
+        </div>
+        <ol class="chain" data-chain aria-live="polite"></ol>
+        <p class="note">Datos copiados del repositorio privado del LMS al {snapshotDate}.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCRUM + KANBAN -->
+  <section class="section alt">
+    <div class="container">
+      <SectionHeader kicker="Scrum + Kanban" title="Ciclos de una semana. Un tablero que muestra todo.">
+        <p class="lead">
+          Tomamos de Scrum el ciclo corto con planificación y demo, y de Kanban el tablero donde cada historia avanza a la vista
+          de todos. Nunca pasa más de una semana sin que veas software funcionando.
+        </p>
+      </SectionHeader>
+
+      <ol class="week">
+        {
+          week.map((w) => (
+            <li class="card">
+              <span class="mono day">{w.day}</span>
+              <h3>{w.title}</h3>
+              <p>{w.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <h3 class="subhead">El tablero del LMS hoy</h3>
+      <div class="board">
+        {
+          board.map((col) => (
+            <div class="col">
+              <div class="col-head">
+                <span>{col.col}</span>
+                <span class="mono count">{col.cards.length}</span>
+              </div>
+              {col.cards.length ? (
+                col.cards.map((c) => <div class="kcard card">{c}</div>)
+              ) : (
+                <p class="empty">Vacía esta semana</p>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- GITFLOW -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader kicker="GitFlow" title="Cada cambio tiene su camino, su revisión y su registro." />
+      <figure class="gitflow card">
+        <svg viewBox="0 0 640 170" role="img" aria-labelledby="gf-title">
+          <title id="gf-title">
+            Ramas de GitFlow: las ramas feat salen de develop y vuelven por Pull Request; develop se publica a main.
+          </title>
+          <line class="l-main" x1="70" y1="35" x2="620" y2="35" />
+          <line class="l-dev" x1="70" y1="90" x2="620" y2="90" />
+          <path class="l-feat" d="M140 90 C 160 140, 180 140, 200 140 L 280 140 C 300 140, 320 140, 340 90" />
+          <path class="l-feat" d="M380 90 C 400 140, 420 140, 440 140 L 480 140 C 500 140, 510 140, 520 90" />
+          <path class="l-rel" d="M560 90 L 590 35" />
+          <text x="10" y="40">main</text>
+          <text x="10" y="95">develop</text>
+          <text x="200" y="162" class="small">feat/… → PR</text>
+          <text x="420" y="162" class="small">fix/… → PR</text>
+          <circle class="c-dev" cx="340" cy="90" r="7" />
+          <circle class="c-dev" cx="520" cy="90" r="7" />
+          <circle class="c-main" cx="590" cy="35" r="8" />
+          <text x="598" y="22" class="small">release</text>
+        </svg>
+        <figcaption class="note">develop despliega solo al ambiente de prueba; main, a producción.</figcaption>
+      </figure>
+      <div class="rules">
+        {
+          gitRules.map((r) => (
+            <div>
+              <h4>{r.title}</h4>
+              <p>{r.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ISO 29110 -->
+  <section class="section alt">
+    <div class="container">
+      <SectionHeader kicker="ISO/IEC 29110 · perfil Entrada" title="Lo que recibes además del software.">
+        <p class="lead">
+          ISO/IEC 29110 es la norma de ciclo de vida de software para organizaciones pequeñas. Adoptamos su perfil Entrada de
+          forma liviana: cada actividad deja un documento concreto y verificable. Estos son los del LMS y su estado real.
+        </p>
+      </SectionHeader>
+      <div class="deliverables">
+        {
+          deliverables.map((d) => (
+            <div class="card deliv">
+              <span class="mono code">{d.code}</span>
+              <h3>{d.name}</h3>
+              <p>{d.what}</p>
+              <span class="status">{d.status}</span>
+            </div>
+          ))
+        }
+      </div>
+      <p class="note disclaimer">
+        Basado en ISO/IEC 29110, perfil Entrada, en adopción liviana. No es una certificación.
+      </p>
+    </div>
+  </section>
+
+  <!-- IA CON REGLAS -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader kicker="IA con reglas · Claude Code" title="La IA acelera. Las personas deciden.">
+        <p class="lead">
+          Desarrollamos con Claude Code organizado en agentes especializados. Cada uno trabaja en su parte del sistema y tiene
+          prohibido lo demás. Ninguno hace commit, abre un PR ni despliega: eso lo hace siempre una persona.
+        </p>
+      </SectionHeader>
+
+      <ol class="flow" aria-label="Flujo de trabajo con IA">
+        {
+          aiFlow.map((s, i) => {
+            const human = i === 0 || i >= 4;
+            return (
+              <li class={human ? 'human' : 'ai'}>
+                <span class="dot mono" aria-hidden="true">{i + 1}</span>
+                <span class="who mono">{human ? 'Persona' : 'Agente'}</span>
+                <p>{s}</p>
+              </li>
+            );
+          })
+        }
+      </ol>
+
+      <div class="card agents">
+        <div class="agent-row">
+          {
+            builders.map((a) => (
+              <div class="agent">
+                <span class="mono name">{a.name}</span>
+                <p class="can">✓ {a.can}</p>
+                <p class="cannot">× {a.cannot}</p>
+              </div>
+            ))
+          }
+        </div>
+        <p class="decide">
+          <strong>Las personas deciden</strong>
+          <span>IA propone <i>→</i> persona revisa <i>→</i> commit <i>→</i> PR <i>→</i> CI</span>
+        </p>
+        <div class="agent-row">
+          {
+            support.map((a) => (
+              <div class="agent">
+                <span class="mono name">{a.name}</span>
+                <p class="can">✓ {a.can}</p>
+                <p class="cannot">× {a.cannot}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HONESTIDAD -->
+  <section class="section alt">
+    <div class="container honest">
+      <h2>Lo que todavía no está</h2>
+      <p>
+        Adoptamos este proceso completo en octubre de 2026. Hasta hoy, 2 de las 35 historias del LMS lo han recorrido de punta
+        a punta, y sus primeros PRs se mergearon sin la revisión de otro integrante. Lo mostramos igual porque el proceso está
+        hecho para detectar justamente eso: quedó registrado en el acta y la revisión es una tarea pendiente.
+      </p>
+      <a class="btn btn-primary" href="/#contacto">Conversemos tu proyecto</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { cases, ci, review, acceptance } from '../data/metodo';
+
+  const root = document.querySelector<HTMLElement>('[data-trace]')!;
+  const chain = root.querySelector<HTMLElement>('[data-chain]')!;
+  const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-case]')];
+
+  function show(i: number) {
+    const c = cases[i];
+    buttons.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+    const steps: { label: string; state: 'ok' | 'pending'; body: string }[] = [
+      { label: 'Requisito', state: 'ok', body: `<strong>${c.story.rf}</strong> · ${c.story.story}` },
+      { label: 'Historia', state: 'ok', body: `Issue <span class="mono">#${c.story.issue}</span> con sus criterios numerados` },
+      { label: 'Criterio', state: 'ok', body: `<span class="mono">${c.id}</span> <span class="layer">${c.layer}</span><br>${c.criterion}` },
+      { label: 'Test', state: 'ok', body: `<code>${c.test}</code><br><span class="mono path">${c.file}</span>` },
+      {
+        label: 'Pull Requests',
+        state: 'ok',
+        body: c.story.prs.map((p) => `<span class="mono">#${p.n}</span> ${p.title}`).join('<br>'),
+      },
+      {
+        label: 'CI',
+        state: 'ok',
+        body: `PR <span class="mono">#${ci.pr}</span>: ${ci.jobs.map((j) => `${j} ✓`).join(' · ')}`,
+      },
+      { label: 'Revisión por otro integrante', state: 'pending', body: review },
+      { label: 'Aceptación del Cliente', state: 'pending', body: acceptance },
+    ];
+    chain.innerHTML = steps
+      .map(
+        (s) =>
+          `<li class="${s.state}"><span class="mark" aria-hidden="true">${s.state === 'ok' ? '✓' : '…'}</span><div><div class="step-label">${s.label}${s.state === 'pending' ? ' <span class="pill">pendiente</span>' : ''}</div><div class="step-body">${s.body}</div></div></li>`,
+      )
+      .join('');
+  }
+
+  buttons.forEach((b) => b.addEventListener('click', () => show(Number(b.dataset.case))));
+  show(0);
+</script>
+
+<style>
+  .m-hero {
+    background: var(--hero-bg);
+    color: var(--hero-ink);
+    padding: 56px 0 64px;
+  }
+  .m-hero .container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .back {
+    color: var(--hero-ink-2);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .m-hero h1 {
+    font-size: clamp(32px, 5vw, 50px);
+    max-width: 20ch;
+  }
+  .intro {
+    font-size: 18px;
+    color: var(--hero-ink-2);
+    max-width: 64ch;
+  }
+  .subhead {
+    font-size: 22px;
+    margin: 48px 0 18px;
+  }
+  .note {
+    margin-top: 12px;
+  }
+
+  /* Trazabilidad */
+  .picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .picker .btn {
+    font-family: var(--font-mono);
+    border-color: var(--line);
+  }
+  .picker .btn[aria-pressed='true'] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .chain {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Semana y tablero */
+  .week {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 16px;
+  }
+  .week li {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .day {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sand);
+  }
+  .week h3 {
+    font-size: 19px;
+  }
+  .week p {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: 12px;
+  }
+  .col {
+    padding: 12px;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--line) 45%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 140px;
+  }
+  .col-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+  }
+  .count {
+    color: var(--muted);
+  }
+  .kcard {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .empty {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* GitFlow */
+  .gitflow {
+    margin: 0 0 32px;
+    padding: 20px;
+  }
+  .gitflow svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .gitflow line,
+  .gitflow path {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .l-main {
+    stroke: var(--sand);
+  }
+  .l-dev,
+  .l-rel {
+    stroke: var(--accent);
+  }
+  .l-feat {
+    stroke: var(--muted);
+    stroke-dasharray: 2 7;
+  }
+  .gitflow text {
+    font: 600 14px var(--font-mono);
+    fill: var(--ink);
+  }
+  .gitflow text.small {
+    font-size: 12px;
+    font-weight: 400;
+    fill: var(--ink-2);
+  }
+  .c-dev {
+    fill: var(--accent);
+  }
+  .c-main {
+    fill: var(--sand);
+  }
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 24px;
+  }
+  .rules h4 {
+    margin: 0 0 6px;
+    font-size: 17px;
+  }
+  .rules p {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+
+  /* ISO */
+  .deliverables {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 16px;
+  }
+  .deliv {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .code {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .deliv h3 {
+    font-size: 17px;
+  }
+  .deliv p {
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .status {
+    margin-top: auto;
+    align-self: flex-start;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--sand-soft);
+    color: var(--sand);
+  }
+  .disclaimer {
+    font-weight: 600;
+  }
+
+  /* IA */
+  /* Línea de flujo: vertical en móvil, horizontal desde 900px. */
+  .flow {
+    list-style: none;
+    margin: 0 0 40px;
+    padding: 0;
+    display: grid;
+  }
+  .flow li {
+    position: relative;
+    padding: 0 0 26px 54px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .flow li::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--line);
+  }
+  .flow li:first-child::before {
+    top: 18px;
+  }
+  .flow li:last-child::before {
+    bottom: calc(100% - 18px);
+  }
+  .dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 600;
+    border: 2px solid;
+  }
+  .flow .human .dot {
+    background: var(--sand-soft);
+    border-color: var(--sand);
+    color: var(--sand);
+  }
+  .flow .ai .dot {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .flow p {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .who {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    padding-top: 2px;
+  }
+  .human .who {
+    color: var(--sand);
+  }
+  .ai .who {
+    color: var(--accent);
+  }
+  @media (min-width: 900px) {
+    .flow {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .flow li {
+      padding: 54px 10px 0;
+      align-items: center;
+      text-align: center;
+    }
+    .flow li::before,
+    .flow li:first-child::before,
+    .flow li:last-child::before {
+      left: 0;
+      right: 0;
+      top: 18px;
+      bottom: auto;
+      width: auto;
+      height: 2px;
+    }
+    .flow li:first-child::before {
+      left: 50%;
+    }
+    .flow li:last-child::before {
+      right: 50%;
+    }
+    .dot {
+      left: calc(50% - 19px);
+    }
+  }
+  .agents {
+    padding: clamp(16px, 3vw, 28px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .agent-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+    gap: 16px;
+  }
+  .agent {
+    padding: 18px 18px 16px;
+    border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .name {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .can,
+  .cannot {
+    font-size: 15px;
+  }
+  .can {
+    color: var(--ok);
+  }
+  .cannot {
+    color: var(--bad);
+  }
+  .decide {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 6px 14px;
+    padding: 18px 20px;
+    border: 1.5px solid var(--ok);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--ok) 12%, transparent);
+    font-size: 18px;
+    text-align: center;
+  }
+  .decide strong {
+    font-weight: 800;
+  }
+  .decide span {
+    color: var(--ink-2);
+  }
+  .decide i {
+    font-style: normal;
+    color: var(--muted);
+  }
+
+  /* Honestidad */
+  .honest {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+    max-width: 780px;
+  }
+  .honest h2 {
+    font-size: 28px;
+  }
+  .honest p {
+    color: var(--ink-2);
+  }
+</style>
+
+<style is:global>
+  [data-chain] li {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+    padding-bottom: 18px;
+    position: relative;
+  }
+  [data-chain] li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 17px;
+    top: 34px;
+    bottom: 0;
+    width: 2px;
+    background: var(--line);
+  }
+  [data-chain] .mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  [data-chain] .pending .mark {
+    background: var(--sand-soft);
+    color: var(--sand);
+    border: 2px dashed var(--sand);
+  }
+  [data-chain] .step-label {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    padding-top: 7px;
+  }
+  [data-chain] .step-body {
+    margin-top: 4px;
+    font-size: 15px;
+    color: var(--ink-2);
+    overflow-wrap: anywhere;
+  }
+  [data-chain] .step-body strong {
+    color: var(--ink);
+  }
+  [data-chain] code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink);
+  }
+  [data-chain] .path {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  [data-chain] .layer,
+  [data-chain] .pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  [data-chain] .pill {
+    background: var(--sand-soft);
+    color: var(--sand);
+  }
+</style>

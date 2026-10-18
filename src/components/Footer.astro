@@ -1,0 +1,35 @@
+---
+import { company, program } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer>
+  <div class="container inner">
+    <span><strong>{company.name}</strong> · {company.region}</span>
+    <span>{program.status} a {program.name}</span>
+    <a href="/unete">Únete al equipo</a>
+    <span class="muted">© {year} · Hecho en Tarapacá</span>
+  </div>
+</footer>
+
+<style>
+  footer {
+    background: var(--hero-bg);
+    color: var(--hero-ink-2);
+    padding: 28px 0;
+    font-size: 14px;
+  }
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  a {
+    color: inherit;
+  }
+  strong {
+    color: var(--hero-ink);
+    letter-spacing: 0.06em;
+  }
+</style>

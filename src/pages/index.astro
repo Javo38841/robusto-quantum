@@ -1,0 +1,950 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import CorridorMap from '../components/CorridorMap.astro';
+import AxisCards from '../components/AxisCards.astro';
+import { Image } from 'astro:assets';
+import heroPhoto from '../assets/puerto-iquique.jpg';
+import demosPhoto from '../assets/tren-salar-carcote.jpg';
+import { company, program, team, lmsStats } from '../data/site';
+import { guideSteps, guidePdf } from '../data/guia';
+
+// Fotos con licencia libre (hero y demos): el crédito es obligatorio (CC BY-SA 4.0).
+const demosCredit = {
+  title: 'Ferrocarril en el salar de Carcote',
+  author: 'Diego Delso',
+  source: 'https://commons.wikimedia.org/wiki/File:Ferrocarril_en_el_salar_de_Carcote,_Chile,_2016-02-09,_DD_70.JPG',
+  license: 'CC BY-SA 4.0',
+  licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/deed.es',
+};
+const photoCredit = {
+  title: 'Puerto de Iquique',
+  author: 'Corsario CL',
+  source: 'https://commons.wikimedia.org/wiki/File:Puerto_de_Iquique.jpg',
+  license: 'CC BY-SA 4.0',
+  licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/deed.es',
+};
+
+// Las secciones siguen los criterios de evaluación de la Vía B de Quantum III:
+// motivación (25%), equipo y capacidad transferible (35%), potencial de adaptación (25%)
+// y diferenciación (15%).
+
+// Cifras del Plan de Acción de la Comisión de Alto Nivel del CBV, citadas en las bases de Quantum III.
+const gaps = [
+  { value: '26', label: 'brechas prioritarias identificadas para la región' },
+  { value: '46%', label: 'corresponden a eficiencia operacional' },
+  { value: '38%', label: 'a riesgos de sostenibilidad del sistema logístico' },
+];
+
+// TODO: reemplazar por la motivación real del equipo, en sus palabras. Este borrador solo
+// usa hechos ya publicados en el sitio y en las bases.
+const motivation = [
+  'Crecimos en Tarapacá. Vemos todos los días los camiones hacia el puerto y la frontera, y sabemos que buena parte de esa operación todavía se coordina con planillas, papeles y llamadas.',
+  'Las soluciones tecnológicas para el corredor han venido mayoritariamente de fuera de la región. Queremos que también se construyan aquí, cerca de quienes las usan.',
+  'No partimos de cero: ya construimos software exigente en otros sectores. Postulamos para aplicar esa capacidad a un desafío logístico real, junto a las empresas del corredor.',
+];
+
+const t = lmsStats.tests;
+const totalTests = t.unit + t.integration + t.e2e;
+const counters = [
+  { value: totalTests, label: 'pruebas automáticas' },
+  { value: lmsStats.prsMerged, label: 'cambios revisados e integrados' },
+  { value: lmsStats.environments, label: 'ambientes en paralelo' },
+  { value: lmsStats.adrs, label: 'decisiones de arquitectura documentadas' },
+];
+
+// Experiencia real del equipo (criterio "capacidad transferible"). A propósito no se
+// nombran las empresas donde trabajamos.
+const capabilities = [
+  {
+    who: 'Javier · en producción',
+    title: 'Gestión de flota en una importadora de Iquique',
+    text: 'Un MVP que ubica los vehículos en un mapa y registra cada llave por gaveta numerada. Hoy lo usan bodega, jefatura de logística y el área comercial.',
+  },
+  {
+    who: 'Javier · en producción',
+    title: 'Integración de sistemas empresariales',
+    text: 'Una API que conecta el ERP con el CRM de un proveedor externo para consultar notas de venta y emitir facturas, más análisis de fallas del ERP hasta su origen.',
+  },
+  {
+    who: 'Proyecto propio',
+    title: 'Plataforma multi-organización desde cero',
+    text: 'Un LMS con los datos de cada organización aislados, pruebas automáticas en tres capas y despliegue automático en dos ambientes.',
+  },
+];
+
+const hasGuide = guidePdf.ready;
+const guideHref = hasGuide
+  ? `/${guidePdf.file}`
+  : `mailto:${company.email}?subject=${encodeURIComponent(`Quiero la guía de ${company.name}`)}`;
+
+const differences = [
+  { title: 'Equipo de la región', text: 'Estamos en Tarapacá: podemos ir a terreno, conversar con quienes operan y volver la semana siguiente con cambios.' },
+  { title: 'Rigor de equipo grande', text: 'Proceso documentado bajo ISO/IEC 29110, pruebas automáticas y revisión de cada cambio, a escala de equipo pequeño.' },
+  { title: 'Una plataforma, muchas empresas', text: 'Datos aislados por organización y permisos verificados en cada acción, para servir a todo un ecosistema de operadores.' },
+  { title: 'En la nube o en tus servidores', text: 'El mismo sistema corre en la nube o en la infraestructura de cada empresa, según lo que exija su operación.' },
+];
+---
+
+<BaseLayout
+  title={`${company.name} · ${company.tagline}`}
+  description={`Equipo de ingenieros de Tarapacá, ${program.status.toLowerCase()} a ${program.name}, que aplica su experiencia en software a desafíos logísticos del Corredor Bioceánico.`}
+>
+  <!-- HERO -->
+  <section id="inicio" class="hero">
+    <Image
+      class="hero-photo"
+      src={heroPhoto}
+      alt=""
+      width={2000}
+      widths={[800, 1400, 2000]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+    />
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="kicker mono">{program.status} a {program.short} · {program.via}</p>
+        <h1>{company.tagline}.</h1>
+        <p class="hero-lead">
+          Somos un equipo de ingenieros de Tarapacá que ya construye software exigente en otros sectores. Queremos aplicar esa
+          capacidad a desafíos reales de la logística regional, junto a las empresas del corredor.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#capacidad">Ver lo que ya hacemos</a>
+          <a class="btn ghost" href="#demos">Probar las demos</a>
+        </div>
+      </div>
+      <CorridorMap />
+    </div>
+    <p class="photo-credit">
+      Foto: <a href={photoCredit.source} rel="noopener">«{photoCredit.title}»</a>, {photoCredit.author} ·
+      <a href={photoCredit.licenseUrl} rel="noopener">{photoCredit.license}</a> · vía Wikimedia Commons
+    </p>
+  </section>
+
+  <!-- MOTIVACIÓN -->
+  <section id="motivacion" class="section">
+    <div class="container">
+      <SectionHeader kicker="Por qué logística, por qué desde aquí" title="El corredor llega a Iquique. Queremos que su tecnología también se haga aquí." />
+      <div class="motivation">
+        <div class="motivation-copy">
+          {motivation.map((p) => <p>{p}</p>)}
+        </div>
+        <div class="gaps">
+          {
+            gaps.map((g) => (
+              <div class="card gap">
+                <span class="gap-value">{g.value}</span>
+                <span class="gap-label">{g.label}</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+      <p class="source mono">Fuente: Plan de Acción de la Comisión de Alto Nivel del Corredor Bioceánico Vial, citado en las bases de {program.short}.</p>
+    </div>
+  </section>
+
+  <!-- CAPACIDAD TRANSFERIBLE -->
+  <section id="capacidad" class="section alt">
+    <div class="container">
+      <SectionHeader kicker="Lo que ya sabemos hacer" title="Software que ya usan personas reales, todos los días.">
+        <p class="lead">
+          Trabajamos como ingenieros de software: uno en una empresa de software y otro en una importadora de la región. No
+          llegamos con una idea en blanco.
+        </p>
+      </SectionHeader>
+      <div class="lines">
+        {
+          capabilities.map((c) => (
+            <article class="card line">
+              <span class="tag mono">{c.who}</span>
+              <h3>{c.title}</h3>
+              <p class="cap-text">{c.text}</p>
+            </article>
+          ))
+        }
+      </div>
+
+      <h3 class="subhead spaced">El LMS, en números</h3>
+      <div class="counters">
+        {
+          counters.map((c) => (
+            <div class="card counter">
+              <span class="counter-value mono">{c.value}</span>
+              <span class="counter-label">{c.label}</span>
+            </div>
+          ))
+        }
+      </div>
+      <p class="source mono">Conteo en el repositorio al {lmsStats.countedAt}.</p>
+      <a class="btn btn-primary more" href="/metodo">Ver el método con evidencia real →</a>
+    </div>
+  </section>
+
+  <!-- DEMOS -->
+  <section id="demos" class="section photo-section">
+    <Image class="section-photo" src={demosPhoto} alt="" width={2000} widths={[800, 1400, 2000]} sizes="100vw" quality={55} />
+    <div class="container">
+      <SectionHeader kicker="Pruebas de concepto" title="Dos demos que puedes probar ahora.">
+        <p class="lead">
+          Funcionan en tu navegador, con datos ficticios. Son para conversar sobre un problema con algo concreto en pantalla.
+        </p>
+      </SectionHeader>
+      <AxisCards />
+    </div>
+    <p class="photo-credit">
+      Foto: <a href={demosCredit.source} rel="noopener">«{demosCredit.title}»</a>, {demosCredit.author} ·
+      <a href={demosCredit.licenseUrl} rel="noopener">{demosCredit.license}</a> · vía Wikimedia Commons
+    </p>
+  </section>
+
+  <!-- CÓMO TRABAJAR CON NOSOTROS (guía para clientes) -->
+  <section id="guia" class="section alt">
+    <div class="container">
+      <SectionHeader kicker="Cómo trabajar con nosotros" title="Qué haces tú en cada paso. Sin tecnicismos.">
+        <p class="lead">
+          No necesitas saber de software. Son cinco pasos, y en cada uno recibes algo concreto.
+        </p>
+      </SectionHeader>
+      <ol class="gflow" aria-label="Pasos para trabajar con nosotros">
+        {
+          guideSteps.map((g, i) => (
+            <li>
+              <span class="gdot mono" aria-hidden="true">{i + 1}</span>
+              <h3>{g.title}</h3>
+              <p><span class="mono">Recibes</span>{g.get}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="card guide-cta">
+        <div class="guide-cover" aria-hidden="true">
+          <span class="mono">Guía</span>
+          <strong>Cómo trabajar con {company.name}</strong>
+          <small>Paso a paso, para tu equipo</small>
+        </div>
+        <div class="guide-cta-copy">
+          <h3>Llévate la guía completa</h3>
+          <p>
+            Qué haces tú en cada paso, quién de tu equipo participa y cuánto tiempo toma. Incluye un checklist para la
+            primera reunión, respuestas a las preguntas de siempre y nuestro contacto.
+          </p>
+          <a class="btn btn-primary" href={guideHref} download={hasGuide ? '' : undefined}>
+            {hasGuide ? 'Descargar la guía (PDF)' : 'Pídenos la guía por correo'}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIFERENCIACIÓN -->
+  <section id="diferencia" class="section">
+    <div class="container">
+      <SectionHeader kicker="Qué nos diferencia" title="Cerca de la operación, con el rigor de un equipo profesional." />
+      <div class="guarantees">
+        {
+          differences.map((d) => (
+            <div class="guarantee">
+              <h4>{d.title}</h4>
+              <p>{d.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {
+    program.videoUrl && (
+      <section id="video" class="section">
+        <div class="container">
+          <SectionHeader kicker="En 3 minutos" title="Quiénes somos y por qué queremos trabajar en logística." />
+          <div class="video">
+            <iframe src={program.videoUrl} title={`Video de presentación de ${company.name}`} loading="lazy" allowfullscreen />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- EQUIPO -->
+  <section id="equipo" class="section alt">
+    <div class="container">
+      <SectionHeader kicker="Equipo" title="Formados en la UTFSM. Construyendo para Tarapacá." />
+      <div class="team">
+        {
+          team.map((m) =>
+            m.pending ? (
+              <a class="card member pending join" href="/unete">
+                <span class="avatar" aria-hidden="true">{m.initials}</span>
+                <div>
+                  <h3>Buscamos {m.role.toLowerCase()}</h3>
+                  <p class="role">Tarapacá</p>
+                </div>
+                <p class="bio">{m.bio}</p>
+                <span class="go">¿Quieres sumarte? Únete al equipo →</span>
+              </a>
+            ) : (
+              <article class="card member">
+                <span class="avatar" aria-hidden="true">{m.initials}</span>
+                <div>
+                  <h3>{m.name}</h3>
+                  <p class="role">{m.role}</p>
+                </div>
+                <p class="bio">{m.bio}</p>
+                {m.skills.length > 0 && <ul class="chips">{m.skills.map((s) => <li>{s}</li>)}</ul>}
+                {m.github && (
+                  <a class="gh mono" href={m.github} rel="noopener">
+                    {m.github.replace('https://', '')}
+                  </a>
+                )}
+              </article>
+            ),
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="contacto" class="contact">
+    <div class="container contact-inner">
+      <div>
+        <h2>¿Tu empresa tiene un desafío logístico que hoy vive en papel o planillas?</h2>
+        <p>Buscamos desafíos reales para trabajar con quienes operan el corredor. Conversemos sin compromiso.</p>
+      </div>
+      <a class="btn btn-primary" href={`mailto:${company.email}?subject=${encodeURIComponent(`Desafío para ${company.name}`)}`}>
+        Escríbenos
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* HERO: foto del puerto de fondo, con una capa del color del hero para que el texto
+     y el mapa del corredor se lean igual que antes. */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--hero-bg);
+    color: var(--hero-ink);
+    padding: 72px 0 88px;
+  }
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 60%;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, var(--hero-bg) 0%, color-mix(in srgb, var(--hero-bg) 88%, transparent) 45%, color-mix(in srgb, var(--hero-bg) 62%, transparent) 100%),
+      linear-gradient(0deg, var(--hero-bg) 0%, transparent 35%);
+  }
+  /* Sección con foto de fondo (demos): mismo método que el hero. Redefine los colores
+     para que el texto y las tarjetas se lean sobre la capa oscura. */
+  .photo-section {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--hero-bg);
+    color: var(--hero-ink);
+    --ink: var(--hero-ink);
+    --ink-2: var(--hero-ink-2);
+    --muted: #9fb0bd;
+    --accent: #3cc2b8;
+    --sand: #e0a54a;
+    --line: rgb(255 255 255 / 0.16);
+    --surface: color-mix(in srgb, var(--hero-bg) 74%, transparent);
+  }
+  .section-photo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 55%;
+  }
+  .photo-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--hero-bg) 92%, transparent) 0%, color-mix(in srgb, var(--hero-bg) 70%, transparent) 55%, color-mix(in srgb, var(--hero-bg) 88%, transparent) 100%);
+  }
+  .photo-section :global(.card) {
+    backdrop-filter: blur(6px);
+  }
+  .photo-credit {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 10px;
+    text-align: right;
+    margin: 0;
+    font-size: 11px;
+    color: var(--hero-ink-2);
+    opacity: 0.8;
+  }
+  .photo-credit a {
+    color: inherit;
+  }
+  .hero-grid {
+    display: grid;
+    gap: 48px;
+    align-items: center;
+  }
+  @media (min-width: 960px) {
+    .hero-grid {
+      grid-template-columns: 1.1fr 1fr;
+    }
+  }
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .kicker {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sand);
+  }
+  .hero h1 {
+    font-size: clamp(34px, 5.5vw, 56px);
+  }
+  .hero-lead {
+    font-size: 19px;
+    color: var(--hero-ink-2);
+    max-width: 56ch;
+  }
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .ghost {
+    color: var(--hero-ink);
+    border-color: rgb(255 255 255 / 0.35);
+  }
+
+  /* OPORTUNIDAD */
+  .gaps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    gap: 16px;
+  }
+  .gap {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .gap-value {
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--sand);
+    line-height: 1.1;
+  }
+  .gap-label {
+    color: var(--ink-2);
+  }
+  .source {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* QUÉ HACEMOS */
+  .lines {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 20px;
+  }
+  .line {
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .tag {
+    align-self: flex-start;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .line h3 {
+    font-size: 22px;
+  }
+  dl {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  dt {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  dd {
+    margin: 0;
+    color: var(--ink-2);
+  }
+  .base {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* CÓMO TRABAJAMOS */
+  .steps {
+    list-style: none;
+    margin: 0 0 56px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+    gap: 20px;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 3px solid var(--accent);
+  }
+  .step-n {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .step h3 {
+    font-size: 18px;
+  }
+  .step p {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+  .subhead {
+    font-size: 22px;
+    margin: 0 0 18px;
+  }
+  .subhead.spaced {
+    margin-top: 56px;
+  }
+  .guarantees {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 24px;
+  }
+  .guarantee h4 {
+    margin: 0 0 6px;
+    font-size: 17px;
+  }
+  .guarantee p {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+
+  /* DIFERENCIA */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 16px;
+  }
+  .pillar {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pillar h3 {
+    font-size: 19px;
+  }
+  .pillar p {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+  .pillar .proof {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .more {
+    margin-top: 28px;
+  }
+
+  /* CASO LMS */
+  .counters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .counter {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .counter-value {
+    font-size: 42px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--accent);
+  }
+  .counter-label {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .tiers {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .tiers h3 {
+    font-size: 18px;
+  }
+  .tier {
+    display: grid;
+    grid-template-columns: minmax(0, 220px) 1fr;
+    gap: 14px;
+    align-items: center;
+  }
+  @media (max-width: 560px) {
+    .tier {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+  .tier-label {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: max(var(--w), 56px);
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+  .tier:nth-of-type(2) .bar {
+    background: var(--sand);
+    color: #1f1404;
+  }
+  .stack {
+    margin-top: 20px;
+  }
+
+  /* EQUIPO */
+  .team {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 20px;
+  }
+  .member {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .member.pending {
+    border-style: dashed;
+    background: transparent;
+  }
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 20px;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .pending .avatar {
+    background: var(--sand-soft);
+    color: var(--sand);
+  }
+  .member h3 {
+    font-size: 20px;
+  }
+  .role {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .bio {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .gh {
+    font-size: 13px;
+    margin-top: auto;
+  }
+
+  /* CONTACTO */
+  .contact {
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 72px 0;
+  }
+  .contact-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .contact h2 {
+    font-size: clamp(26px, 3.5vw, 34px);
+    max-width: 28ch;
+    margin-bottom: 10px;
+  }
+  .contact p {
+    max-width: 56ch;
+    opacity: 0.9;
+  }
+  .contact .btn-primary {
+    background: var(--accent-ink);
+    border-color: var(--accent-ink);
+    color: var(--accent);
+  }
+
+  /* MOTIVACIÓN */
+  .motivation {
+    display: grid;
+    gap: 32px;
+    align-items: start;
+  }
+  @media (min-width: 960px) {
+    .motivation {
+      grid-template-columns: 1.2fr 1fr;
+    }
+  }
+  .motivation-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-size: 18px;
+    color: var(--ink-2);
+    max-width: 62ch;
+  }
+  .motivation .gaps {
+    grid-template-columns: 1fr;
+  }
+
+  /* CAPACIDAD */
+  .cap-text {
+    color: var(--ink-2);
+  }
+
+  /* GUÍA PARA CLIENTES: mapa de flujo, vertical en móvil y horizontal desde 900px
+     (mismo diseño que la línea de flujo de /metodo). */
+  .gflow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+  }
+  .gflow li {
+    position: relative;
+    padding: 0 0 26px 54px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .gflow li::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--line);
+  }
+  .gflow li:first-child::before {
+    top: 18px;
+  }
+  .gflow li:last-child::before {
+    bottom: calc(100% - 18px);
+  }
+  .gdot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 600;
+    border: 2px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .gflow li:last-child .gdot {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .gflow h3 {
+    font-size: 17px;
+    padding-top: 8px;
+  }
+  .gflow p {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+  .gflow p span {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--sand);
+  }
+  @media (min-width: 900px) {
+    .gflow {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .gflow li {
+      padding: 54px 12px 0;
+      align-items: center;
+      text-align: center;
+    }
+    .gflow li::before,
+    .gflow li:first-child::before,
+    .gflow li:last-child::before {
+      left: 0;
+      right: 0;
+      top: 18px;
+      bottom: auto;
+      width: auto;
+      height: 2px;
+    }
+    .gflow li:first-child::before {
+      left: 50%;
+    }
+    .gflow li:last-child::before {
+      right: 50%;
+    }
+    .gdot {
+      left: calc(50% - 19px);
+    }
+    .gflow h3 {
+      padding-top: 0;
+    }
+  }
+  .guide-cta {
+    margin-top: 28px;
+    padding: clamp(20px, 4vw, 36px);
+    display: grid;
+    gap: 28px;
+    align-items: center;
+  }
+  @media (min-width: 760px) {
+    .guide-cta {
+      grid-template-columns: 220px 1fr;
+    }
+  }
+  .guide-cover {
+    aspect-ratio: 3 / 4;
+    max-width: 220px;
+    border-radius: 10px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    color: var(--hero-ink);
+    background: linear-gradient(160deg, var(--accent), var(--hero-bg) 75%);
+    box-shadow: 0 18px 40px color-mix(in srgb, var(--hero-bg) 35%, transparent);
+  }
+  .guide-cover span {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sand);
+  }
+  .guide-cover strong {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+  .guide-cover small {
+    color: var(--hero-ink-2);
+  }
+  .guide-cta-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .guide-cta-copy h3 {
+    font-size: 24px;
+  }
+  .guide-cta-copy p {
+    color: var(--ink-2);
+    max-width: 60ch;
+  }
+
+  /* VIDEO */
+  .video {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .video iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* EQUIPO: tarjeta para sumarse */
+  .join {
+    color: inherit;
+    text-decoration: none;
+  }
+  .join:hover {
+    border-color: var(--sand);
+  }
+  .join .go {
+    margin-top: auto;
+    font-weight: 600;
+    color: var(--accent);
+  }
+</style>

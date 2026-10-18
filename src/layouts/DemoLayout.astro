@@ -1,0 +1,100 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { company } from '../data/site';
+import { axisBySlug } from '../data/demos';
+
+interface Props {
+  slug: string;
+  intro: string;
+  // Qué tendría la versión real: deja claro que esto es una prueba de concepto.
+  real: string[];
+}
+const { slug, intro, real } = Astro.props;
+const axis = axisBySlug(slug);
+---
+
+<BaseLayout title={`${axis.demo} · Demo · ${company.name}`} description={axis.summary}>
+  <section class="demo-hero">
+    <div class="container">
+      <a class="back mono" href="/demos">← Demos / {axis.n} {axis.axis}</a>
+      <h1>{axis.demo}</h1>
+      <p class="intro">{intro}</p>
+      <p class="disclaimer mono" role="note">Demo ilustrativa · datos ficticios · sin backend</p>
+    </div>
+  </section>
+
+  <section class="section demo-body">
+    <div class="container">
+      <slot />
+
+      <aside class="card real">
+        <h2>Cómo sería la versión real</h2>
+        <ul>{real.map((r) => <li>{r}</li>)}</ul>
+        <a class="btn btn-primary" href="/#contacto">Conversemos este desafío</a>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .demo-hero {
+    background: var(--hero-bg);
+    color: var(--hero-ink);
+    padding: 48px 0 56px;
+  }
+  .demo-hero .container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .back {
+    color: var(--hero-ink-2);
+    font-size: 13px;
+    text-decoration: none;
+  }
+  .back:hover {
+    color: var(--hero-ink);
+  }
+  h1 {
+    font-size: clamp(30px, 5vw, 46px);
+  }
+  .intro {
+    font-size: 18px;
+    color: var(--hero-ink-2);
+    max-width: 64ch;
+  }
+  .disclaimer {
+    align-self: flex-start;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--sand);
+    color: #1f1404;
+  }
+  .demo-body {
+    padding-top: 48px;
+  }
+  .real {
+    margin-top: 48px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-left: 4px solid var(--accent);
+  }
+  .real h2 {
+    font-size: 22px;
+  }
+  .real ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--ink-2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .real .btn {
+    align-self: flex-start;
+  }
+</style>

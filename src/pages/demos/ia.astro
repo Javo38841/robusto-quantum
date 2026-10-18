@@ -1,0 +1,279 @@
+---
+import DemoLayout from '../../layouts/DemoLayout.astro';
+import { docTitle, suggested, chunks } from '../../data/demos/rag';
+---
+
+<DemoLayout
+  slug="ia"
+  intro="Pregúntale al manual de operación de un terminal en lenguaje natural. El asistente primero busca los fragmentos relevantes y después responde citándolos. Si la respuesta no está en la documentación, lo dice en vez de inventarla."
+  real={[
+    'Carga de los documentos reales de la empresa (PDF, Word, procedimientos), actualizados cuando cambian.',
+    'Un modelo de lenguaje que redacta la respuesta solo a partir de los fragmentos recuperados, siempre con su cita.',
+    'Permisos: cada persona consulta solo los documentos que le corresponden.',
+    'Puede alojarse en la infraestructura del cliente cuando la documentación es sensible.',
+  ]}
+>
+  <div class="demo-grid rag" data-rag>
+    <div class="card panel">
+      <h2>Base de conocimiento</h2>
+      <p class="doc mono">{docTitle}</p>
+      <p class="note">{chunks.length} fragmentos indexados en tu navegador.</p>
+      <h2>Prueba con</h2>
+      <ul class="suggested">
+        {
+          suggested.map((s, i) => (
+            <li>
+              <button type="button" class="btn btn-sm" data-suggested={i}>
+                {s.q}
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="card panel">
+      <form class="ask" data-form>
+        <label class="sr-only" for="q">Tu pregunta</label>
+        <input id="q" type="text" name="q" placeholder="Escribe tu pregunta, por ejemplo: velocidad máxima en el patio" autocomplete="off" />
+        <button type="submit" class="btn btn-primary btn-sm">Preguntar</button>
+      </form>
+
+      <ol class="steps" data-steps>
+        <li data-step="1">Pregunta</li>
+        <li data-step="2">Búsqueda de fragmentos</li>
+        <li data-step="3">Respuesta con citas</li>
+      </ol>
+
+      <div class="answer" data-answer aria-live="polite">
+        <p class="note">Elige una pregunta sugerida o escribe la tuya.</p>
+      </div>
+
+      <div data-sources></div>
+    </div>
+  </div>
+</DemoLayout>
+
+<script>
+  import { chunks, suggested, stopwords, type Chunk } from '../../data/demos/rag';
+
+  const root = document.querySelector<HTMLElement>('[data-rag]')!;
+  const form = root.querySelector<HTMLFormElement>('[data-form]')!;
+  const input = form.querySelector<HTMLInputElement>('input')!;
+  const answerEl = root.querySelector<HTMLElement>('[data-answer]')!;
+  const sourcesEl = root.querySelector<HTMLElement>('[data-sources]')!;
+  const steps = [...root.querySelectorAll<HTMLElement>('[data-step]')];
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Normaliza: minúsculas, sin tildes, sin plural simple.
+  const norm = (w: string) =>
+    w
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/(es|s)$/, '');
+  const tokens = (text: string) =>
+    text
+      .toLowerCase()
+      .split(/[^\p{L}\p{N}]+/u)
+      .filter((w) => w.length > 2 && !stopwords.has(w))
+      .map(norm);
+
+  // Índice TF-IDF mínimo sobre sección + texto.
+  const docs = chunks.map((c) => ({ chunk: c, terms: tokens(`${c.section} ${c.text}`) }));
+  const df = new Map<string, number>();
+  docs.forEach((d) => new Set(d.terms).forEach((t) => df.set(t, (df.get(t) ?? 0) + 1)));
+  const idf = (t: string) => Math.log(1 + chunks.length / (df.get(t) ?? chunks.length));
+
+  function search(q: string) {
+    const qt = [...new Set(tokens(q))];
+    return docs
+      .map((d) => {
+        const hits = qt.filter((t) => d.terms.includes(t));
+        const score = hits.reduce((s, t) => s + d.terms.filter((x) => x === t).length * idf(t), 0);
+        return { chunk: d.chunk, score, hits };
+      })
+      .filter((r) => r.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+  }
+
+  const escape = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+  const highlight = (text: string, hits: string[]) =>
+    text
+      .split(/(\s+)/)
+      .map((w) => {
+        const t = norm(w.replace(/[^\p{L}\p{N}]/gu, ''));
+        return hits.includes(t) ? `<mark>${escape(w)}</mark>` : escape(w);
+      })
+      .join('');
+
+  // Respuesta extractiva para preguntas libres: la oración del mejor fragmento con más coincidencias.
+  function extract(chunk: Chunk, hits: string[]) {
+    const sentences = chunk.text.split(/(?<=\.)\s+/);
+    return sentences
+      .map((s) => ({ s, n: tokens(s).filter((t) => hits.includes(t)).length }))
+      .sort((a, b) => b.n - a.n)[0].s;
+  }
+
+  const setStep = (n: number) => steps.forEach((s, i) => (s.dataset.state = i < n ? 'done' : ''));
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
+
+  async function ask(q: string, preset?: (typeof suggested)[number]) {
+    if (!q.trim()) return;
+    input.value = q;
+    setStep(1);
+    sourcesEl.innerHTML = '';
+    answerEl.innerHTML = '<p class="note">Buscando en la documentación…</p>';
+    await wait(450);
+
+    const results = search(q);
+    const sources = preset && preset.cites.length
+      ? preset.cites.map((id) => results.find((r) => r.chunk.id === id) ?? { chunk: chunks.find((c) => c.id === id)!, score: 0, hits: [] })
+      : results;
+    setStep(2);
+    sourcesEl.innerHTML = sources.length
+      ? `<h3>Fragmentos recuperados</h3><ul class="sources">${sources
+          .map(
+            (r) =>
+              `<li><div class="src-head"><span class="mono cite">[${r.chunk.id}]</span> ${escape(r.chunk.section)}${r.score ? `<span class="mono score">relevancia ${r.score.toFixed(2)}</span>` : ''}</div><p>${highlight(r.chunk.text, r.hits)}</p></li>`,
+          )
+          .join('')}</ul>`
+      : '';
+    await wait(550);
+
+    setStep(3);
+    let html: string;
+    if (preset && preset.answer) {
+      html = `<p>${escape(preset.answer)} ${preset.cites.map((c) => `<span class="mono cite">[${c}]</span>`).join(' ')}</p>`;
+    } else if ((preset && !preset.answer) || !results.length || results[0].score < 0.8) {
+      html = '<p class="alert warn">No encontré esa información en la documentación disponible. Prefiero decirlo antes que inventar una respuesta.</p>';
+      sourcesEl.innerHTML = '';
+    } else {
+      const top = results[0];
+      html = `<p>Según la documentación: ${escape(extract(top.chunk, top.hits))} <span class="mono cite">[${top.chunk.id}]</span></p><p class="note">Respuesta extractiva: la versión real redacta con un modelo de lenguaje a partir de estos mismos fragmentos.</p>`;
+    }
+    answerEl.innerHTML = html;
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    ask(input.value);
+  });
+  root.querySelectorAll<HTMLButtonElement>('[data-suggested]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const s = suggested[Number(b.dataset.suggested)];
+      ask(s.q, s);
+    }),
+  );
+</script>
+
+<style is:global>
+  .rag .doc {
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .rag .suggested {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .rag .suggested .btn {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    border-radius: 10px;
+    border-color: var(--line);
+    padding: 8px 12px;
+    height: auto;
+  }
+  .rag .suggested .btn:hover {
+    border-color: var(--accent);
+  }
+  .rag .ask {
+    display: flex;
+    gap: 8px;
+  }
+  .rag .ask input {
+    flex: 1;
+    min-width: 0;
+  }
+  .rag .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .rag .steps li {
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .rag .steps li[data-state='done'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .rag .answer {
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .rag .cite {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .rag h3 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .rag .sources {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rag .sources li {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .rag .src-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .rag .score {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .rag mark {
+    background: var(--sand-soft);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+</style>

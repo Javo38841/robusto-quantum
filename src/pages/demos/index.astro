@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
+import AxisCards from '../../components/AxisCards.astro';
+import { company } from '../../data/site';
+---
+
+<BaseLayout
+  title={`Demos · ${company.name}`}
+  description="Pruebas de concepto interactivas para la logística del norte: trazabilidad de carga y un asistente de documentación con IA."
+>
+  <section class="section">
+    <div class="container">
+      <SectionHeader kicker="Pruebas de concepto" title="Seis ejes de la logística del norte. Dos demos que puedes probar ahora.">
+        <p class="lead">
+          Cada demo muestra cómo podría verse una solución para uno de los ejes de la logística del norte. Funcionan
+          completamente en tu navegador, con datos ficticios: son para conversar sobre el problema, no productos terminados.
+        </p>
+      </SectionHeader>
+      <AxisCards />
+    </div>
+  </section>
+</BaseLayout>

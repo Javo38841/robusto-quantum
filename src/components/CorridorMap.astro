@@ -1,0 +1,122 @@
+---
+// Esquema (no a escala) del Corredor Bioceánico Vial: de Brasil al puerto de Iquique.
+const stops = [
+  { x: 60, country: 'Brasil', place: 'Porto Murtinho' },
+  { x: 200, country: 'Paraguay', place: 'Carmelo Peralta' },
+  { x: 340, country: 'Argentina', place: 'Salta · Jujuy' },
+  { x: 480, country: 'Chile', place: 'Iquique', home: true },
+];
+---
+
+<figure class="corridor">
+  <svg viewBox="0 0 580 170" role="img" aria-labelledby="corridor-title">
+    <title id="corridor-title">
+      Esquema del Corredor Bioceánico Vial: Brasil, Paraguay, Argentina y Chile, terminando en el puerto de Iquique hacia
+      Asia-Pacífico.
+    </title>
+    <path class="route" d="M60 80 C 130 40, 160 120, 200 80 S 300 40, 340 80 S 440 120, 480 80" />
+    <path class="sea" d="M480 80 L 560 80" />
+    <text class="pacific" x="560" y="66" text-anchor="end">Asia-Pacífico →</text>
+    {
+      stops.map((s) => (
+        <g class={s.home ? 'stop home' : 'stop'}>
+          {s.home && <circle class="pulse" cx={s.x} cy="80" r="10" />}
+          <circle cx={s.x} cy="80" r={s.home ? 9 : 6} />
+          <text x={s.x} y="122" text-anchor="middle" class="country">
+            {s.country}
+          </text>
+          <text x={s.x} y="140" text-anchor="middle" class="place">
+            {s.place}
+          </text>
+        </g>
+      ))
+    }
+  </svg>
+  <figcaption class="mono">Corredor Bioceánico Vial · más de 2.400 km · esquema no a escala</figcaption>
+</figure>
+
+<style>
+  .corridor {
+    margin: 0;
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    /* Fondo semiopaco: el hero tiene una foto detrás y el esquema debe leerse sobre ella. */
+    background: color-mix(in srgb, var(--hero-bg) 78%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .route {
+    fill: none;
+    stroke: var(--hero-ink-2);
+    stroke-width: 3;
+    stroke-dasharray: 2 8;
+    stroke-linecap: round;
+  }
+  .sea {
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-dasharray: 6 6;
+  }
+  .stop circle {
+    fill: var(--hero-bg);
+    stroke: var(--hero-ink-2);
+    stroke-width: 3;
+  }
+  .home circle {
+    fill: var(--sand);
+    stroke: var(--sand);
+  }
+  .home .pulse {
+    fill: none;
+    stroke: var(--sand);
+    stroke-width: 2;
+    transform-origin: 480px 80px;
+    animation: pulse 2.4s ease-out infinite;
+  }
+  @keyframes pulse {
+    from {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    to {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home .pulse {
+      animation: none;
+      display: none;
+    }
+  }
+  text {
+    font-family: var(--font-sans);
+  }
+  .country {
+    fill: var(--hero-ink);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .place {
+    fill: var(--hero-ink-2);
+    font-size: 12px;
+  }
+  .home .country {
+    fill: var(--sand);
+  }
+  .pacific {
+    fill: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  figcaption {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--hero-ink-2);
+  }
+</style>

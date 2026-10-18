@@ -1,0 +1,340 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import Pipeline from '../components/Pipeline.astro';
+import { company, program, careers } from '../data/site';
+
+// Perfiles que buscamos. El de negocio y diseño cubre el cupo "por confirmar" del equipo y
+// suma al criterio de equipo multidisciplinario de las bases.
+const roles = [
+  {
+    title: 'Negocio y desarrollo comercial',
+    text: 'Conversar con empresas y operadores del corredor, entender sus desafíos y ayudarnos a validar cada solución y su modelo de negocio.',
+    looking: ['Interés por la logística, el comercio exterior o el emprendimiento', 'Facilidad para conversar con empresas', 'Estudiante o profesional de áreas comerciales, de ingeniería o afines'],
+  },
+  {
+    title: 'Diseño de producto (UX/UI)',
+    text: 'Diseñar pantallas simples para personas que trabajan en terreno: conductores, operadores y personal de puerto.',
+    looking: ['Portafolio con trabajos de diseño de interfaces', 'Ganas de ir a terreno a observar cómo se trabaja', 'Manejo de Figma o una herramienta similar'],
+  },
+  {
+    title: 'Desarrollo de software',
+    text: 'Construir junto al equipo las plataformas web, con pruebas automáticas y revisión de cada cambio.',
+    looking: ['TypeScript, idealmente con NestJS o Angular', 'Ganas de aprender buenas prácticas: pruebas, revisión de código, CI/CD', 'GitHub o proyectos que podamos ver'],
+  },
+];
+
+const steps = [
+  { title: 'Entendemos el proceso', text: 'Antes de proponer software, conversamos con quienes hacen el trabajo todos los días.' },
+  { title: 'Acordamos criterios', text: 'Cada funcionalidad se escribe como casos verificables ("dado… cuando… entonces…") antes de programar.' },
+  { title: 'Construimos con pruebas', text: 'Cada criterio tiene su prueba automática. Si una falla, el cambio no avanza.' },
+  { title: 'Demo cada viernes', text: 'Lo nuevo se muestra funcionando en un ambiente de prueba y el cliente decide si se acepta.' },
+  { title: 'Pasa a producción', text: 'Solo lo aceptado llega a producción, con despliegue automático y trazable.' },
+];
+
+const pillars = [
+  { tag: 'ISO/IEC 29110', title: 'Proceso documentado', text: 'Plan, actas semanales, casos de prueba y una matriz que une cada requisito con su código y su evidencia.' },
+  { tag: 'Scrum + Kanban', title: 'Ciclos de una semana', text: 'Planificación y demo cada viernes, y un tablero donde se ve en qué está cada historia.' },
+  { tag: 'GitFlow + CI', title: 'Calidad automática', text: 'Todo cambio entra por Pull Request, lo revisa otra persona y pasa pruebas en tres capas.' },
+  { tag: 'Claude Code', title: 'IA con reglas', text: 'Agentes especializados con alcance acotado: escriben tests y código, pero nunca hacen commit ni despliegan.' },
+];
+
+const after = [
+  'Leemos cada postulación y te respondemos por correo.',
+  'Si tu perfil calza, agendamos una conversación de 30 minutos.',
+  'Según el rol, te pedimos un ejercicio corto o revisar juntos tu portafolio.',
+];
+
+const mailto = (role: string) =>
+  `mailto:${careers.email}?subject=${encodeURIComponent(`${careers.subject} – ${role}`)}`;
+---
+
+<BaseLayout
+  title={`Únete al equipo · ${company.name}`}
+  description={`Cómo trabajamos por dentro y qué perfiles buscamos para sumarse a ${company.name}, en Tarapacá.`}
+>
+  <section class="hero">
+    <div class="container">
+      <p class="kicker mono">Únete al equipo</p>
+      <h1>Construyamos desde Tarapacá la tecnología del corredor.</h1>
+      <p class="hero-lead">
+        Somos un equipo pequeño que trabaja como uno profesional. Si te interesa la logística, el diseño o el software y
+        quieres aprender haciendo proyectos reales para la región, queremos conocerte.
+      </p>
+      <a class="btn btn-primary" href="#perfiles">Ver perfiles</a>
+    </div>
+  </section>
+
+  <!-- CÓMO TRABAJAMOS POR DENTRO -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader kicker="Cómo trabajamos" title="Las pruebas deciden qué avanza. El cliente decide qué se acepta.">
+        <p class="lead">Esto es lo que vas a vivir en el día a día si te sumas.</p>
+      </SectionHeader>
+      <ol class="steps">
+        {
+          steps.map((s, i) => (
+            <li class="step">
+              <span class="step-n mono">{String(i + 1).padStart(2, '0')}</span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+
+      <h3 class="subhead">Así viaja un cambio antes de llegar a producción</h3>
+      <Pipeline />
+
+      <h3 class="subhead spaced">Nuestras prácticas</h3>
+      <div class="pillars">
+        {
+          pillars.map((p) => (
+            <div class="card pillar">
+              <span class="tag mono">{p.tag}</span>
+              <h4>{p.title}</h4>
+              <p>{p.text}</p>
+            </div>
+          ))
+        }
+      </div>
+      <a class="btn more" href="/metodo">Ver el método con evidencia real →</a>
+    </div>
+  </section>
+
+  <!-- PERFILES -->
+  <section id="perfiles" class="section alt">
+    <div class="container">
+      <SectionHeader kicker="A quién buscamos" title="Perfiles que queremos sumar al equipo." />
+      <div class="roles">
+        {
+          roles.map((r) => (
+            <article class="card role-card">
+              <h3>{r.title}</h3>
+              <p>{r.text}</p>
+              <ul>{r.looking.map((l) => <li>{l}</li>)}</ul>
+              <a class="btn btn-primary btn-sm" href={mailto(r.title)}>Postular a este rol</a>
+            </article>
+          ))
+        }
+      </div>
+      <p class="spontaneous">
+        ¿No calzas en ninguno pero quieres aportar? <a href={mailto('Espontánea')}>Envíanos una postulación espontánea →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- CONDICIONES -->
+  <section class="section">
+    <div class="container cond">
+      <div>
+        <SectionHeader kicker="Para tener en cuenta" title="Somos un equipo en etapa temprana." />
+        <ul class="checks">
+          <li>Buscamos personas que vivan o trabajen en la <strong>Región de Tarapacá</strong>.</li>
+          <li>
+            Somos {program.status.toLowerCase()} a <strong>{program.name}</strong>. Si quedamos seleccionados, el programa exige
+            un 90% de asistencia, así que valoramos tu disponibilidad para participar.
+          </li>
+          <li>Te contamos con honestidad las condiciones del rol en la primera conversación.</li>
+        </ul>
+      </div>
+      <div class="card apply">
+        <h3>Cómo postular</h3>
+        <ol>
+          <li>Escribe a <a href={mailto('Rol')}>{careers.email}</a> con el asunto <span class="mono">“{careers.subject} – [rol]”</span>.</li>
+          <li>Adjunta tu CV y, si tienes, tu GitHub o portafolio.</li>
+          <li>Cuéntanos en tres líneas por qué te interesa.</li>
+        </ol>
+        <h3>Qué pasa después</h3>
+        <ol>{after.map((a) => <li>{a}</li>)}</ol>
+        <p class="privacy">Usamos tus datos solo para este proceso de selección y puedes pedirnos eliminarlos cuando quieras.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    background: var(--hero-bg);
+    color: var(--hero-ink);
+    padding: 80px 0 88px;
+  }
+  .hero .container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+  }
+  .kicker {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sand);
+  }
+  .hero h1 {
+    font-size: clamp(34px, 5.5vw, 54px);
+    max-width: 20ch;
+  }
+  .hero-lead {
+    font-size: 19px;
+    color: var(--hero-ink-2);
+    max-width: 58ch;
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0 0 56px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+    gap: 20px;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 3px solid var(--accent);
+  }
+  .step-n {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .step h3 {
+    font-size: 18px;
+  }
+  .step p {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+  .subhead {
+    font-size: 22px;
+    margin: 0 0 18px;
+  }
+  .subhead.spaced {
+    margin-top: 56px;
+  }
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 16px;
+  }
+  .pillar {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pillar h4 {
+    margin: 0;
+    font-size: 18px;
+  }
+  .pillar p {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+  .tag {
+    align-self: flex-start;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .more {
+    margin-top: 28px;
+  }
+
+  .roles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 20px;
+  }
+  .role-card {
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .role-card h3 {
+    font-size: 21px;
+  }
+  .role-card p,
+  .role-card ul {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .role-card ul {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .role-card .btn {
+    margin-top: auto;
+    align-self: flex-start;
+  }
+  .spontaneous {
+    margin-top: 28px;
+    color: var(--ink-2);
+  }
+
+  .cond {
+    display: grid;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (min-width: 960px) {
+    .cond {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .checks {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: var(--ink-2);
+  }
+  .checks li {
+    padding-left: 28px;
+    position: relative;
+  }
+  .checks li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .apply {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .apply h3 {
+    font-size: 19px;
+  }
+  .apply ol {
+    margin: 0 0 8px;
+    padding-left: 20px;
+    color: var(--ink-2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 15px;
+  }
+  .privacy {
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+</style>
