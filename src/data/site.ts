@@ -47,16 +47,23 @@ export const team: Member[] = [
     skills: ['NestJS', 'Angular', 'PostgreSQL', 'Docker', 'CI/CD'],
     github: 'https://github.com/Javo38841',
   },
+
   {
     name: 'Tomás Solar',
     initials: 'TS',
-    role: 'Backend',
-    bio: 'Desarrollador semi senior en una empresa de software, compañero de generación en la UTFSM. Construye backend y reglas de negocio para sistemas en producción.',
-    skills: ['Backend', 'APIs', 'Reglas de negocio'],
+    role: 'Backend & Software Architecture',
+    bio: 'Software Engineer Semi Senior en Buk. Experiencia en diseño de arquitecturas backend, desarrollo de sistemas de alta escala y migración de plataformas críticas utilizadas por cerca de un millón de personas. Apasionado por resolver problemas complejos y construir soluciones tecnológicas de impacto.',
+    skills: [
+      'Ruby on Rails',
+      'Java / Spring Boot',
+      'PostgreSQL',
+      'System Design',
+      'RabbitMQ',
+      'REST APIs',
+    ],
     github: 'https://github.com/tsolarc',
   },
-  // { name: 'Cristina', initials: 'C', role: '…', bio: '…', skills: [] },
-  // { name: 'Yomara', initials: 'Y', role: '…', bio: '…', skills: [] },
+
   {
     name: 'Por confirmar',
     initials: '+',
