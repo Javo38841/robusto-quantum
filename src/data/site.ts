@@ -48,8 +48,8 @@ export const team: Member[] = [
     github: 'https://github.com/Javo38841',
   },
   {
-    name: 'Tomás',
-    initials: 'T',
+    name: 'Tomás Solar',
+    initials: 'TS',
     role: 'Backend',
     bio: 'Desarrollador semi senior en una empresa de software, compañero de generación en la UTFSM. Construye backend y reglas de negocio para sistemas en producción.',
     skills: ['Backend', 'APIs', 'Reglas de negocio'],
