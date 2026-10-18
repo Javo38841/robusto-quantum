@@ -1,6 +1,6 @@
 // Datos de la startup. El nombre es provisional: cambiarlo aquí lo cambia en todo el sitio.
 export const company = {
-  name: 'Robusto',
+  name: 'Jamelin',
   tagline: 'Software para la logística del Corredor Bioceánico',
   region: 'Tarapacá, Chile',
   email: 'jchoque0@gmail.com', // TODO: reemplazar por un correo de la empresa cuando exista

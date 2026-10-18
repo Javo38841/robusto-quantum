@@ -1,4 +1,4 @@
-# Robusto — landing para Quantum III
+# Jamelin — landing para Quantum III
 
 Sitio del equipo postulante a **Quantum III – Logistic Innovation Lab** (Vía B), hecho en
 Astro. El nombre es provisional: se cambia en `src/data/site.ts`, junto con el equipo, el
