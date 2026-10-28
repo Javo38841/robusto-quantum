@@ -1,3 +1,6 @@
+import type { ImageMetadata } from 'astro';
+import sebastianPhoto from '../assets/equipo/sebastian-morales.png';
+
 // Datos de la startup. El nombre es provisional: cambiarlo aquí lo cambia en todo el sitio.
 export const company = {
   name: 'Jamelin',
@@ -35,6 +38,8 @@ export type Member = {
   bio: string;
   skills: string[];
   github?: string;
+  linkedin?: string;
+  photo?: ImageMetadata;
   pending?: boolean;
 };
 
@@ -51,7 +56,7 @@ export const team: Member[] = [
   {
     name: 'Tomás Solar',
     initials: 'TS',
-    role: 'Backend & Software Architecture',
+    role: 'Tech Lead',
     bio: 'Software Engineer Semi Senior en Buk. Experiencia en diseño de arquitecturas backend, desarrollo de sistemas de alta escala y migración de plataformas críticas utilizadas por cerca de un millón de personas. Apasionado por resolver problemas complejos y construir soluciones tecnológicas de impacto.',
     skills: [
       'Ruby on Rails',
@@ -62,6 +67,16 @@ export const team: Member[] = [
       'REST APIs',
     ],
     github: 'https://github.com/tsolarc',
+  },
+
+  {
+    name: 'Sebastián Morales',
+    initials: 'SM',
+    photo: sebastianPhoto,
+    role: 'Software Architect',
+    bio: 'Software Engineer especializado en integración de sistemas. Integró datos en tiempo real (GTFS-RT) para paneles de transporte público, sobre servicios Linux tolerantes a fallos. Ha llevado a producción APIs y paneles operativos para transporte, educación y gestión.',
+    skills: ['Python / FastAPI', 'Ruby on Rails', 'APIs REST', 'GTFS-RT', 'Datos en tiempo real', 'Linux'],
+    linkedin: 'https://www.linkedin.com/in/smoraleslo/',
   },
 
   {

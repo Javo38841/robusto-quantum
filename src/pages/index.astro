@@ -280,16 +280,20 @@ const differences = [
             m.pending ? (
               <a class="card member pending join" href="/unete">
                 <span class="avatar" aria-hidden="true">{m.initials}</span>
-                <div>
+                <div class="join-text">
                   <h3>Tu lugar aquí</h3>
                   <p class="role">Tarapacá</p>
+                  <p class="bio">{m.bio}</p>
                 </div>
-                <p class="bio">{m.bio}</p>
                 <span class="go">¿Quieres sumarte? Únete al equipo →</span>
               </a>
             ) : (
               <article class="card member">
-                <span class="avatar" aria-hidden="true">{m.initials}</span>
+                {m.photo ? (
+                  <Image class="avatar photo" src={m.photo} alt={m.name} width={112} height={112} />
+                ) : (
+                  <span class="avatar" aria-hidden="true">{m.initials}</span>
+                )}
                 <div>
                   <h3>{m.name}</h3>
                   <p class="role">{m.role}</p>
@@ -299,6 +303,14 @@ const differences = [
                 {m.github && (
                   <a class="gh mono" href={m.github} rel="noopener">
                     {m.github.replace('https://', '')}
+                  </a>
+                )}
+                {m.linkedin && (
+                  <a class="gh mono in" href={m.linkedin} rel="noopener">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z" />
+                    </svg>
+                    {m.linkedin.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '')}
                   </a>
                 )}
               </article>
@@ -681,6 +693,26 @@ const differences = [
   .member.pending {
     border-style: dashed;
     background: transparent;
+    grid-column: 1 / -1;
+  }
+  .join-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  @media (min-width: 760px) {
+    .member.pending {
+      flex-direction: row;
+      align-items: center;
+      gap: 24px;
+    }
+    .join-text {
+      flex: 1;
+    }
+    .member.pending .go {
+      margin-top: 0;
+      white-space: nowrap;
+    }
   }
   .avatar {
     width: 56px;
@@ -692,6 +724,9 @@ const differences = [
     font-size: 20px;
     background: var(--accent);
     color: var(--accent-ink);
+  }
+  .avatar.photo {
+    object-fit: cover;
   }
   .pending .avatar {
     background: var(--sand-soft);
@@ -712,6 +747,11 @@ const differences = [
   .gh {
     font-size: 13px;
     margin-top: auto;
+  }
+  .gh.in {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 
   /* CONTACTO */
