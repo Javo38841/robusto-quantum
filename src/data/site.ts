@@ -1,6 +1,6 @@
 import type { ImageMetadata } from 'astro';
 import javierPhoto from '../assets/equipo/javier-choque.png';
-import tomasPhoto from '../assets/equipo/tomas-solar.jpeg';
+import tomasPhoto from '../assets/equipo/tomas-solar.jpg';
 import sebastianPhoto from '../assets/equipo/sebastian-morales.png';
 
 // Datos de la startup. El nombre es provisional: cambiarlo aquí lo cambia en todo el sitio.
