@@ -1,5 +1,5 @@
 import type { ImageMetadata } from 'astro';
-import javierPhoto from '../assets/equipo/javier-choque.jpeg';
+import javierPhoto from '../assets/equipo/javier-choque.png';
 import tomasPhoto from '../assets/equipo/tomas-solar.jpeg';
 import sebastianPhoto from '../assets/equipo/sebastian-morales.png';
 
@@ -60,7 +60,7 @@ export const team: Member[] = [
     photo: javierPhoto,
     color: 'amber',
     role: 'Product Owner · Logística',
-    bio: 'Egresado de Ingeniería en Informática (UTFSM), de Alto Hospicio. Desarrolla soluciones de logística de punta a punta en una importadora de ZOFRI, donde construyó un sistema de gestión de flota que hoy está en producción. Traduce la operación real en requisitos y criterios de aceptación.',
+    bio: 'Desarrolla soluciones de logística de punta a punta en una importadora de ZOFRI, donde construyó un sistema de gestión de flota que hoy está en producción. Traduce la operación real en requisitos y criterios de aceptación.',
     skills: ['Logística E2E', 'Operación ZOFRI', 'Criterios de aceptación', 'ISO/IEC 29110', 'NestJS', 'Angular'],
     linkedin: 'https://www.linkedin.com/in/javier-silvio-choque-flores-49904923b/',
   },
