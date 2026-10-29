@@ -20,6 +20,16 @@
   --hero-bg: #0f2233;
   --hero-ink: #f2f5f7;
   --hero-ink-2: #b6c3cd;
+  /* Color de cada integrante (ver `team` en src/data/site.ts): ámbar, violeta y azul,
+     separados en el círculo cromático y lejos del acento turquesa. Contraste AA con
+     --m-on y con --surface. */
+  --m-amber: #8f5a0e;
+  --m-amber-soft: #f6ebd8;
+  --m-violet: #7a3fa6;
+  --m-violet-soft: #efe6f7;
+  --m-blue: #1f63ab;
+  --m-blue-soft: #e3edf8;
+  --m-on: #ffffff;
 
   --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -44,6 +54,13 @@
     --ok: #4cc283;
     --bad: #ef6b5b;
     --hero-bg: #071019;
+    --m-amber: #e9b660;
+    --m-amber-soft: #2e2414;
+    --m-violet: #c9a2f2;
+    --m-violet-soft: #261b36;
+    --m-blue: #82b6f0;
+    --m-blue-soft: #132538;
+    --m-on: #0b1620;
     color-scheme: dark;
   }
 }

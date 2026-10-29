@@ -1,0 +1,171 @@
+---
+// Entregables ISO/IEC 29110 de /por-dentro como línea de tiempo del proyecto: en qué etapa
+// recibe el cliente cada documento. Horizontal desde 900px y vertical en móvil.
+// La grilla anterior quedó en DeliverablesGrid.astro.
+import { deliverables, phases } from '../data/metodo';
+
+// Íconos de línea (24×24, trazo en currentColor), uno por etapa.
+const icons: Record<string, string> = {
+  // Bandera de partida
+  Inicio: '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
+  // Regla y lápiz
+  Diseño: '<path d="m14.5 4.5 5 5L9 20H4v-5z"/><path d="m12 7 5 5"/>',
+  // Flecha circular: se repite cada semana
+  'Cada semana': '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
+  // Sello de aprobado
+  Cierre: '<circle cx="12" cy="10" r="6"/><path d="m9.5 10 1.8 1.8L14.8 8.3"/><path d="M8.5 15 7 21l5-2.5L17 21l-1.5-6"/>',
+};
+---
+
+<ol class="timeline">
+  {
+    phases.map((phase, i) => (
+      <li class:list={['phase', { loop: phase.name === 'Cada semana' }]}>
+        <div class="phase-head">
+          <span class="node" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              set:html={icons[phase.name]}
+            />
+          </span>
+          {i < phases.length - 1 && <span class="arrow" aria-hidden="true" />}
+        </div>
+        <span class="step mono">Etapa {i + 1}</span>
+        <h3>{phase.name}</h3>
+        <p class="summary">{phase.summary}</p>
+        <ul class="docs">
+          {deliverables
+            .filter((d) => d.phase === phase.name)
+            .map((d) => (
+              <li>
+                <span class="doc-code mono">{d.code}</span>
+                <h4>{d.name}</h4>
+                <p>{d.what}</p>
+              </li>
+            ))}
+        </ul>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 40px;
+  }
+  .phase {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phase-head {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .node {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  /* "Cada semana" se repite: anillo punteado alrededor del ícono. */
+  .loop .node {
+    outline: 2px dashed var(--accent);
+    outline-offset: 4px;
+  }
+  /* Flecha hacia la etapa siguiente: oculta en móvil, donde las etapas se leen hacia abajo. */
+  .arrow {
+    display: none;
+  }
+  .step {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .phase h3 {
+    margin: 4px 0 6px;
+    font-size: 20px;
+  }
+  .summary {
+    margin: 0 0 16px;
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .docs {
+    list-style: none;
+    margin: 0;
+    padding: 4px 18px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    flex: 1;
+  }
+  .docs li {
+    padding: 14px 0;
+  }
+  .docs li + li {
+    border-top: 1px solid var(--line);
+  }
+  .doc-code {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .docs h4 {
+    margin: 2px 0 4px;
+    font-size: 16px;
+  }
+  .docs p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 900px) {
+    .timeline {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .arrow {
+      display: block;
+      flex: 1;
+      position: relative;
+      height: 2px;
+      margin: 0 12px 0 16px;
+      margin-right: -12px;
+      background: var(--line);
+    }
+    .loop .arrow {
+      margin-left: 22px;
+    }
+    .arrow::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 9px;
+      height: 9px;
+      border-top: 2px solid var(--line);
+      border-right: 2px solid var(--line);
+      transform: translate(-1px, -50%) rotate(45deg);
+    }
+  }
+</style>

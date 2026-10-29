@@ -1,0 +1,54 @@
+---
+// Grilla original de entregables ISO/IEC 29110 de /por-dentro. Quedó como respaldo de la
+// línea de tiempo (DeliverablesTimeline); para volver a ella, usarla en por-dentro.astro.
+import { deliverables } from '../data/metodo';
+---
+
+<div class="deliverables">
+  {
+    deliverables.map((d) => (
+      <div class="card deliv">
+        <span class="mono code">{d.code}</span>
+        <h3>{d.name}</h3>
+        <p>{d.what}</p>
+        <span class="status">{d.status}</span>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .deliverables {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 16px;
+  }
+  .deliv {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .code {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .deliv h3 {
+    font-size: 17px;
+  }
+  .deliv p {
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .status {
+    margin-top: auto;
+    align-self: flex-start;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--sand-soft);
+    color: var(--sand);
+  }
+</style>

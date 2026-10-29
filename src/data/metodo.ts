@@ -91,15 +91,34 @@ export const board = [
 ];
 
 // Entregables de ISO/IEC 29110 perfil Entrada (adopción liviana), con su estado real.
-export const deliverables = [
-  { code: 'PM.1', name: 'Plan de proyecto', what: 'Alcance, fases, riesgos y calendario acordados al inicio.', status: 'Hecho' },
-  { code: 'PM.3', name: 'Actas semanales', what: 'Demo, aceptación de cada historia y resultado de cada caso de prueba.', status: 'Primera acta: 16-10-2026' },
-  { code: 'SI.2', name: 'Especificación de requisitos', what: 'Qué debe hacer el sistema, validado por el Cliente.', status: 'Validada el 12-10-2026' },
-  { code: 'SI.3', name: 'Arquitectura y decisiones (ADR)', what: 'Por qué el sistema está construido así, decisión por decisión.', status: '7 ADR' },
-  { code: 'SI.3', name: 'Casos de prueba', what: 'Criterios "dado… cuando… entonces…" escritos antes de programar.', status: 'En cada historia' },
-  { code: 'SI.2–5', name: 'Matriz de trazabilidad', what: 'Requisito → historia → PR → casos de prueba → evidencia.', status: 'En uso' },
-  { code: 'SI.6', name: 'Manual de operación', what: 'Uso, despliegue y respaldo del sistema.', status: 'Borrador' },
-  { code: 'PM.4', name: 'Acta de aceptación', what: 'Cierre formal: qué se entregó y qué aceptó el Cliente.', status: 'Al lanzar el MVP' },
+// `phase` es la etapa del proyecto en que el cliente lo recibe.
+export type Deliverable = {
+  code: string;
+  name: string;
+  what: string;
+  status: string;
+  phase: Phase['name'];
+};
+
+// Etapas del proyecto, en orden, con lo que pasa en cada una (línea de tiempo de /por-dentro).
+export type Phase = { name: 'Inicio' | 'Diseño' | 'Cada semana' | 'Cierre'; summary: string };
+
+export const phases: Phase[] = [
+  { name: 'Inicio', summary: 'Acordamos qué se construye y qué no.' },
+  { name: 'Diseño', summary: 'Decidimos cómo se construye y cómo se prueba.' },
+  { name: 'Cada semana', summary: 'Demo el viernes: aceptas o pides cambios.' },
+  { name: 'Cierre', summary: 'Entrega formal del sistema y de su operación.' },
+];
+
+export const deliverables: Deliverable[] = [
+  { code: 'PM.1', name: 'Plan de proyecto', what: 'Alcance, fases, riesgos y calendario acordados al inicio.', status: 'Hecho', phase: 'Inicio' },
+  { code: 'SI.2', name: 'Especificación de requisitos', what: 'Qué debe hacer el sistema, validado por el Cliente.', status: 'Validada el 12-10-2026', phase: 'Inicio' },
+  { code: 'SI.3', name: 'Arquitectura y decisiones (ADR)', what: 'Por qué el sistema está construido así, decisión por decisión.', status: '7 ADR', phase: 'Diseño' },
+  { code: 'SI.3', name: 'Casos de prueba', what: 'Criterios "dado… cuando… entonces…" escritos antes de programar.', status: 'En cada historia', phase: 'Diseño' },
+  { code: 'PM.3', name: 'Actas semanales', what: 'Demo, aceptación de cada historia y resultado de cada caso de prueba.', status: 'Primera acta: 16-10-2026', phase: 'Cada semana' },
+  { code: 'SI.2–5', name: 'Matriz de trazabilidad', what: 'Requisito → historia → PR → casos de prueba → evidencia.', status: 'En uso', phase: 'Cada semana' },
+  { code: 'SI.6', name: 'Manual de operación', what: 'Uso, despliegue y respaldo del sistema.', status: 'Borrador', phase: 'Cierre' },
+  { code: 'PM.4', name: 'Acta de aceptación', what: 'Cierre formal: qué se entregó y qué aceptó el Cliente.', status: 'Al lanzar el MVP', phase: 'Cierre' },
 ];
 
 // Subagentes de Claude Code del monorepo: alcance acotado por diseño.

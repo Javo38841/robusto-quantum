@@ -6,9 +6,11 @@ import { defineConfig } from 'astro/config';
 // la raíz de un dominio: con la URL por defecto usuario.github.io/<repo> habría que
 // agregar `base` y ajustar esos enlaces.
 export default defineConfig({
-  site: 'https://robusto.gitflow.cl', // TODO: confirmar el subdominio antes de publicar
+  site: 'https://jamelin.gitflow.cl',
   // La página de postulaciones se llamaba "Trabaja con nosotros"; los enlaces viejos siguen funcionando.
   redirects: {
     '/trabaja-con-nosotros': '/unete',
+    // "Método" pasó a llamarse "Por dentro".
+    '/metodo': '/por-dentro',
   },
 });

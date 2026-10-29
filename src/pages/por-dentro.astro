@@ -2,7 +2,19 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import { company } from '../data/site';
-import { cases, board, deliverables, agents, snapshotDate } from '../data/metodo';
+import { Image } from 'astro:assets';
+import heroPhoto from '../assets/puerto-arica-contenedores.jpg';
+
+// Foto con licencia libre: el crédito es obligatorio (CC BY 2.0).
+const photoCredit = {
+  title: 'Puerto de Arica',
+  author: 'Eduardo Woo',
+  source: 'https://commons.wikimedia.org/wiki/File:Puerto_de_Arica_(8209208561).jpg',
+  license: 'CC BY 2.0',
+  licenseUrl: 'https://creativecommons.org/licenses/by/2.0/deed.es',
+};
+import { cases, board, agents, snapshotDate } from '../data/metodo';
+import DeliverablesTimeline from '../components/DeliverablesTimeline.astro';
 
 const week = [
   { day: 'Viernes', title: 'Planificación', text: 'Elegimos contigo las historias de la semana y sus criterios de aceptación.' },
@@ -26,29 +38,110 @@ const aiFlow = [
   'Otro integrante y el CI aprueban',
 ];
 
+// Lo que la plataforma del LMS ya resuelve y cómo se usa en un desafío logístico (respuesta B4
+// del formulario). `status` dice la verdad: solo "Funciona" si está construido y probado en el LMS.
+const reuse = [
+  {
+    today: 'Organizaciones con datos aislados',
+    detail: 'Cada organización con sus usuarios y roles; el permiso se verifica en cada acción.',
+    challenge: 'Cada operador, transportista o agente de aduana con su espacio, sus usuarios y sus permisos.',
+    status: 'Funciona',
+  },
+  {
+    today: 'Documentos seguros',
+    detail: 'Archivos en almacenamiento S3 con enlaces firmados de corta duración; cada uno guarda quién lo subió y cuándo.',
+    challenge: 'Guías de despacho, tickets de báscula y documentos aduaneros adjuntos a cada operación.',
+    status: 'Funciona',
+  },
+  {
+    today: 'Sello encadenado',
+    detail: 'Cada registro lleva un sello SHA-256 unido al anterior: si alguien altera un dato pasado, la cadena lo delata.',
+    challenge: 'Cadena de custodia de cada carga, de la bodega a la recepción, verificable por terceros.',
+    status: 'Prueba de concepto',
+    href: '/demos/trazabilidad',
+  },
+  {
+    today: 'API REST validada',
+    detail: 'Cada entrada se valida antes de tocar la base de datos, con pruebas de integración por endpoint.',
+    challenge: 'Conectarse con los sistemas que ya usa cada actor, sin obligarlos a cambiar de herramienta.',
+    status: 'Funciona',
+  },
+  {
+    today: 'Dos ambientes y despliegue automático',
+    detail: 'Prueba y producción en paralelo, cada uno con su base de datos; el CI corre pruebas en tres capas antes de integrar.',
+    challenge: 'Un piloto con usuarios reales sin arriesgar la operación del día a día.',
+    status: 'Funciona',
+  },
+];
+
 // Los agentes que construyen van arriba; los que revisan y apoyan, abajo.
 const builders = agents.slice(0, 3);
 const support = agents.slice(3);
 ---
 
 <BaseLayout
-  title={`Método · ${company.name}`}
-  description="Cómo trabajamos: ciclos semanales con Scrum y Kanban, GitFlow, documentación basada en ISO/IEC 29110 e IA con reglas. Con evidencia real."
+  title={`Por dentro · ${company.name}`}
+  description="La plataforma que llevaremos al desafío logístico, por dentro: qué ya funciona, ciclos semanales, GitFlow, documentación basada en ISO/IEC 29110 e IA con reglas. Con datos reales."
 >
   <section class="m-hero">
+    <Image
+      class="hero-photo"
+      src={heroPhoto}
+      alt=""
+      width={2000}
+      widths={[800, 1400, 2000]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+    />
     <div class="container">
-      <a class="back mono" href="/#capacidad">← Inicio / Método</a>
-      <h1>Un proceso que puedes verificar, no una promesa.</h1>
+      <a class="back mono" href="/#capacidad">← Inicio / Por dentro</a>
+      <h1>La plataforma que llevaremos al desafío, por dentro.</h1>
       <p class="intro">
-        Somos un equipo pequeño que trabaja como uno grande: ciclos semanales, cada cambio revisado y probado, documentación
-        basada en ISO/IEC 29110 e inteligencia artificial con reglas claras. Todo lo que ves en esta página sale del proyecto
-        real del LMS.
+        No llegamos al Challenge Discovery con una idea en blanco: llegamos con una plataforma que ya funciona y con un proceso
+        que se puede verificar. Todo lo que ves en esta página sale del proyecto real del LMS.
       </p>
+    </div>
+    <p class="photo-credit">
+      Foto: <a href={photoCredit.source} rel="noopener">«{photoCredit.title}»</a>, {photoCredit.author} ·
+      <a href={photoCredit.licenseUrl} rel="noopener">{photoCredit.license}</a> · vía Wikimedia Commons
+    </p>
+  </section>
+
+  <!-- QUÉ LLEVAMOS AL DESAFÍO -->
+  <section class="section">
+    <div class="container">
+      <SectionHeader kicker="Qué llevamos al desafío" title="Lo que ya funciona, y dónde sirve en la logística.">
+        <p class="lead">
+          El LMS es nuestro caso de estudio, no nuestro producto: es la base sobre la que construiremos la solución al desafío
+          que se nos asigne. Estas piezas ya están construidas y probadas.
+        </p>
+      </SectionHeader>
+      <ul class="reuse">
+        {
+          reuse.map((r) => (
+            <li class="card reuse-item">
+              <span class:list={['reuse-status', 'mono', { poc: r.status !== 'Funciona' }]}>{r.status}</span>
+              <h3>{r.today}</h3>
+              <p class="reuse-detail">{r.detail}</p>
+              <p class="reuse-use">
+                <span class="mono">En el desafío</span>
+                {r.challenge}
+              </p>
+              {r.href && (
+                <a class="reuse-link" href={r.href}>
+                  Probar la demo →
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 
   <!-- TRAZABILIDAD -->
-  <section class="section">
+  <section class="section alt">
     <div class="container">
       <SectionHeader kicker="Trazabilidad" title="Elige un criterio y sigue su rastro hasta la aceptación.">
         <p class="lead">
@@ -75,7 +168,7 @@ const support = agents.slice(3);
   </section>
 
   <!-- SCRUM + KANBAN -->
-  <section class="section alt">
+  <section class="section">
     <div class="container">
       <SectionHeader kicker="Scrum + Kanban" title="Ciclos de una semana. Un tablero que muestra todo.">
         <p class="lead">
@@ -118,7 +211,7 @@ const support = agents.slice(3);
   </section>
 
   <!-- GITFLOW -->
-  <section class="section">
+  <section class="section alt">
     <div class="container">
       <SectionHeader kicker="GitFlow" title="Cada cambio tiene su camino, su revisión y su registro." />
       <figure class="gitflow card">
@@ -156,26 +249,16 @@ const support = agents.slice(3);
   </section>
 
   <!-- ISO 29110 -->
-  <section class="section alt">
+  <section class="section">
     <div class="container">
       <SectionHeader kicker="ISO/IEC 29110 · perfil Entrada" title="Lo que recibes además del software.">
         <p class="lead">
           ISO/IEC 29110 es la norma de ciclo de vida de software para organizaciones pequeñas. Adoptamos su perfil Entrada de
-          forma liviana: cada actividad deja un documento concreto y verificable. Estos son los del LMS y su estado real.
+          forma liviana: cada actividad deja un documento concreto y verificable. Estos son los del LMS, etapa por etapa.
         </p>
       </SectionHeader>
-      <div class="deliverables">
-        {
-          deliverables.map((d) => (
-            <div class="card deliv">
-              <span class="mono code">{d.code}</span>
-              <h3>{d.name}</h3>
-              <p>{d.what}</p>
-              <span class="status">{d.status}</span>
-            </div>
-          ))
-        }
-      </div>
+      {/* Para volver a la grilla anterior: <DeliverablesGrid /> en lugar de <DeliverablesTimeline />. */}
+      <DeliverablesTimeline />
       <p class="note disclaimer">
         Basado en ISO/IEC 29110, perfil Entrada, en adopción liviana. No es una certificación.
       </p>
@@ -183,7 +266,7 @@ const support = agents.slice(3);
   </section>
 
   <!-- IA CON REGLAS -->
-  <section class="section">
+  <section class="section alt">
     <div class="container">
       <SectionHeader kicker="IA con reglas · Claude Code" title="La IA acelera. Las personas deciden.">
         <p class="lead">
@@ -239,7 +322,7 @@ const support = agents.slice(3);
   </section>
 
   <!-- HONESTIDAD -->
-  <section class="section alt">
+  <section class="section">
     <div class="container honest">
       <h2>Lo que todavía no está</h2>
       <p>
@@ -293,10 +376,47 @@ const support = agents.slice(3);
 </script>
 
 <style>
+  /* Foto del patio de contenedores de fondo (encuadrada abajo, donde está la operación), con una capa del color del hero para que el texto se lea
+     (mismo método que el hero de la portada). */
   .m-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     background: var(--hero-bg);
     color: var(--hero-ink);
-    padding: 56px 0 64px;
+    padding: 56px 0 72px;
+  }
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 100%;
+  }
+  .m-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, var(--hero-bg) 0%, color-mix(in srgb, var(--hero-bg) 85%, transparent) 40%, color-mix(in srgb, var(--hero-bg) 30%, transparent) 100%),
+      linear-gradient(0deg, color-mix(in srgb, var(--hero-bg) 70%, transparent) 0%, transparent 18%);
+  }
+  .photo-credit {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 10px;
+    text-align: right;
+    margin: 0;
+    font-size: 11px;
+    color: var(--hero-ink-2);
+    opacity: 0.8;
+  }
+  .photo-credit a {
+    color: inherit;
   }
   .m-hero .container {
     display: flex;
@@ -320,6 +440,59 @@ const support = agents.slice(3);
   .subhead {
     font-size: 22px;
     margin: 48px 0 18px;
+  }
+
+  /* Qué llevamos al desafío */
+  .reuse {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 20px;
+  }
+  .reuse-item {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .reuse-item h3 {
+    font-size: 19px;
+    margin: 0;
+  }
+  .reuse-status {
+    align-self: flex-start;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .reuse-status.poc {
+    background: var(--sand-soft);
+    color: var(--ink-2);
+  }
+  .reuse-detail {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+  .reuse-use {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 15px;
+  }
+  .reuse-use .mono {
+    display: block;
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .reuse-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
   }
   .note {
     margin-top: 12px;
@@ -471,39 +644,6 @@ const support = agents.slice(3);
   }
 
   /* ISO */
-  .deliverables {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
-    gap: 16px;
-  }
-  .deliv {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .code {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--accent);
-  }
-  .deliv h3 {
-    font-size: 17px;
-  }
-  .deliv p {
-    font-size: 14px;
-    color: var(--ink-2);
-  }
-  .status {
-    margin-top: auto;
-    align-self: flex-start;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 999px;
-    background: var(--sand-soft);
-    color: var(--sand);
-  }
   .disclaimer {
     font-weight: 600;
   }
@@ -574,8 +714,11 @@ const support = agents.slice(3);
     font-weight: 600;
     padding-top: 2px;
   }
+  /* Persona en ámbar y agente en turquesa: los mismos colores marcan lo que cada agente
+     puede (turquesa). Lo que no puede va en rojo y "Las personas deciden" en verde, para que
+     el límite y la decisión humana resalten. --m-amber pasa contraste AA como texto. */
   .human .who {
-    color: var(--sand);
+    color: var(--m-amber);
   }
   .ai .who {
     color: var(--accent);
@@ -639,7 +782,7 @@ const support = agents.slice(3);
     font-size: 15px;
   }
   .can {
-    color: var(--ok);
+    color: var(--accent);
   }
   .cannot {
     color: var(--bad);
@@ -660,12 +803,11 @@ const support = agents.slice(3);
   .decide strong {
     font-weight: 800;
   }
-  .decide span {
-    color: var(--ink-2);
-  }
+  .decide strong,
+  .decide span,
   .decide i {
     font-style: normal;
-    color: var(--muted);
+    color: var(--ok);
   }
 
   /* Honestidad */

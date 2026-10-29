@@ -1,4 +1,6 @@
 import type { ImageMetadata } from 'astro';
+import javierPhoto from '../assets/equipo/javier-choque.jpeg';
+import tomasPhoto from '../assets/equipo/tomas-solar.jpeg';
 import sebastianPhoto from '../assets/equipo/sebastian-morales.png';
 
 // Datos de la startup. El nombre es provisional: cambiarlo aquí lo cambia en todo el sitio.
@@ -40,23 +42,35 @@ export type Member = {
   github?: string;
   linkedin?: string;
   photo?: ImageMetadata;
+  // Color que identifica a la persona en todo el sitio (tokens --m-* de global.css).
+  color?: MemberColor;
   pending?: boolean;
 };
+
+export type MemberColor = 'amber' | 'violet' | 'blue';
+
+// Variables CSS del color de un integrante, para usar en `style`.
+export const memberVars = (color?: MemberColor) =>
+  color ? `--m: var(--m-${color}); --m-soft: var(--m-${color}-soft);` : undefined;
 
 export const team: Member[] = [
   {
     name: 'Javier Choque',
     initials: 'JC',
-    role: 'Arquitectura y plataforma',
-    bio: 'Egresado de Ingeniería en Informática (UTFSM), de Alto Hospicio. Analista de soporte TI y software en una importadora de Iquique, donde construyó un sistema de gestión de flota en producción. Diseñó desde cero la arquitectura del LMS.',
-    skills: ['NestJS', 'Angular', 'PostgreSQL', 'Docker', 'CI/CD'],
-    github: 'https://github.com/Javo38841',
+    photo: javierPhoto,
+    color: 'amber',
+    role: 'Product Owner · Logística',
+    bio: 'Egresado de Ingeniería en Informática (UTFSM), de Alto Hospicio. Desarrolla soluciones de logística de punta a punta en una importadora de ZOFRI, donde construyó un sistema de gestión de flota que hoy está en producción. Traduce la operación real en requisitos y criterios de aceptación.',
+    skills: ['Logística E2E', 'Operación ZOFRI', 'Criterios de aceptación', 'ISO/IEC 29110', 'NestJS', 'Angular'],
+    linkedin: 'https://www.linkedin.com/in/javier-silvio-choque-flores-49904923b/',
   },
 
   {
     name: 'Tomás Solar',
     initials: 'TS',
-    role: 'Tech Lead',
+    photo: tomasPhoto,
+    color: 'violet',
+    role: 'Tech Lead · Full stack',
     bio: 'Software Engineer Semi Senior en Buk. Experiencia en diseño de arquitecturas backend, desarrollo de sistemas de alta escala y migración de plataformas críticas utilizadas por cerca de un millón de personas. Apasionado por resolver problemas complejos y construir soluciones tecnológicas de impacto.',
     skills: [
       'Ruby on Rails',
@@ -66,14 +80,15 @@ export const team: Member[] = [
       'RabbitMQ',
       'REST APIs',
     ],
-    github: 'https://github.com/tsolarc',
+    linkedin: 'https://www.linkedin.com/in/tomas-solar/',
   },
 
   {
     name: 'Sebastián Morales',
     initials: 'SM',
     photo: sebastianPhoto,
-    role: 'Software Architect',
+    color: 'blue',
+    role: 'Software Architect · Infraestructura y alta disponibilidad',
     bio: 'Software Engineer especializado en integración de sistemas. Integró datos en tiempo real (GTFS-RT) para paneles de transporte público, sobre servicios Linux tolerantes a fallos. Ha llevado a producción APIs y paneles operativos para transporte, educación y gestión.',
     skills: ['Python / FastAPI', 'Ruby on Rails', 'APIs REST', 'GTFS-RT', 'Datos en tiempo real', 'Linux'],
     linkedin: 'https://www.linkedin.com/in/smoraleslo/',

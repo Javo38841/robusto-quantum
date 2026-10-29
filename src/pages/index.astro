@@ -6,7 +6,7 @@ import AxisCards from '../components/AxisCards.astro';
 import { Image } from 'astro:assets';
 import heroPhoto from '../assets/puerto-iquique.jpg';
 import demosPhoto from '../assets/tren-salar-carcote.jpg';
-import { company, program, team, lmsStats } from '../data/site';
+import { company, program, team, lmsStats, memberVars } from '../data/site';
 import { guideSteps, guidePdf } from '../data/guia';
 
 // Fotos con licencia libre (hero y demos): el crédito es obligatorio (CC BY-SA 4.0).
@@ -36,12 +36,20 @@ const gaps = [
   { value: '38%', label: 'a riesgos de sostenibilidad del sistema logístico' },
 ];
 
-// TODO: reemplazar por la motivación real del equipo, en sus palabras. Este borrador solo
-// usa hechos ya publicados en el sitio y en las bases.
+// Motivación del equipo: la misma idea que la respuesta B6 del formulario de postulación.
+// Si cambia una, actualizar la otra.
 const motivation = [
-  'Crecimos en Tarapacá. Vemos todos los días los camiones hacia el puerto y la frontera, y sabemos que buena parte de esa operación todavía se coordina con planillas, papeles y llamadas.',
-  'Las soluciones tecnológicas para el corredor han venido mayoritariamente de fuera de la región. Queremos que también se construyan aquí, cerca de quienes las usan.',
-  'No partimos de cero: ya construimos software exigente en otros sectores. Postulamos para aplicar esa capacidad a un desafío logístico real, junto a las empresas del corredor.',
+  'Tarapacá será la salida al Pacífico del Corredor Bioceánico. Pero el diagnóstico de la región muestra baja digitalización y trazabilidad, y las soluciones tecnológicas para el corredor han venido mayoritariamente de fuera.',
+  'Lo vemos de cerca: trabajamos en la región y sabemos que buena parte de la operación todavía se coordina con planillas, papeles y llamadas. Queremos que la tecnología para operar el corredor se construya aquí, desde Tarapacá.',
+  'Por eso postulamos por la Vía B: para aplicar lo que ya sabemos hacer al desafío logístico real que se nos asigne en el Challenge Discovery, y trabajarlo durante todo el programa.',
+];
+
+// Lo que esperamos tener al terminar el programa (respuesta B6).
+const goals = [
+  'Un desafío logístico real, validado con sus usuarios.',
+  'Un MVP probado con una empresa o actor del corredor.',
+  'Un modelo de negocio claro.',
+  'La red de contactos para convertir ese piloto en un producto replicable para otros operadores.',
 ];
 
 const t = lmsStats.tests;
@@ -54,35 +62,65 @@ const counters = [
 ];
 
 // Experiencia real del equipo (criterio "capacidad transferible"). A propósito no se
-// nombran las empresas donde trabajamos.
-const capabilities = [
+// nombran las empresas donde trabajamos. `by` son las iniciales de quien la aporta.
+const capabilities: { by: string[]; kind: string; title: string; text: string }[] = [
   {
-    who: 'Javier · en producción',
-    title: 'Gestión de flota en una importadora de Iquique',
+    by: ['JC'],
+    kind: 'En producción',
+    title: 'Gestión de flota en una importadora de ZOFRI',
     text: 'Un MVP que ubica los vehículos en un mapa y registra cada llave por gaveta numerada. Hoy lo usan bodega, jefatura de logística y el área comercial.',
   },
   {
-    who: 'Javier · en producción',
+    by: ['JC'],
+    kind: 'En producción',
     title: 'Integración de sistemas empresariales',
     text: 'Una API que conecta el ERP con el CRM de un proveedor externo para consultar notas de venta y emitir facturas, más análisis de fallas del ERP hasta su origen.',
   },
   {
-    who: 'Proyecto propio',
+    by: ['TS'],
+    kind: 'En producción',
+    title: 'Migración de plataformas críticas a escala',
+    text: 'Diseño de arquitecturas backend y migración de plataformas que usan cerca de un millón de personas.',
+  },
+  {
+    by: ['SM'],
+    kind: 'En producción',
+    title: 'Datos en tiempo real, siempre disponibles',
+    text: 'Integración de datos en tiempo real (GTFS-RT) para paneles de transporte público, sobre servicios Linux tolerantes a fallos.',
+  },
+  {
+    by: ['JC', 'TS', 'SM'],
+    kind: 'Proyecto conjunto',
     title: 'Plataforma multi-organización desde cero',
     text: 'Un LMS con los datos de cada organización aislados, pruebas automáticas en tres capas y despliegue automático en dos ambientes.',
   },
 ];
+
+const byInitials = (initials: string) => team.find((m) => m.initials === initials)!;
+const firstName = (initials: string) => byInitials(initials).name.split(' ')[0];
 
 const hasGuide = guidePdf.ready;
 const guideHref = hasGuide
   ? `/${guidePdf.file}`
   : `mailto:${company.email}?subject=${encodeURIComponent(`Quiero la guía de ${company.name}`)}`;
 
+// Íconos de línea (24×24, trazo en currentColor) para la sección "Qué nos diferencia".
+const icons = {
+  // Marcador de mapa
+  pin: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  // Escudo con check
+  shield: '<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6L12 3z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/>',
+  // Capas apiladas
+  layers: '<path d="M12 3 3 7.5 12 12l9-4.5L12 3z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/>',
+  // Nube sobre un servidor
+  cloud: '<path d="M7 10.5a3.25 3.25 0 1 1 .8-6.4A4.75 4.75 0 0 1 17 5.3a2.6 2.6 0 0 1 .2 5.2z"/><path d="M12 10.5V14"/><rect x="4" y="14" width="16" height="6.5" rx="1.5"/><path d="M7.5 17.25h.01M11 17.25h5.5"/>',
+};
+
 const differences = [
-  { title: 'Equipo de la región', text: 'Estamos en Tarapacá: podemos ir a terreno, conversar con quienes operan y volver la semana siguiente con cambios.' },
-  { title: 'Rigor de equipo grande', text: 'Proceso documentado bajo ISO/IEC 29110, pruebas automáticas y revisión de cada cambio, a escala de equipo pequeño.' },
-  { title: 'Una plataforma, muchas empresas', text: 'Datos aislados por organización y permisos verificados en cada acción, para servir a todo un ecosistema de operadores.' },
-  { title: 'En la nube o en tus servidores', text: 'El mismo sistema corre en la nube o en la infraestructura de cada empresa, según lo que exija su operación.' },
+  { icon: icons.pin, title: 'Equipo de la región', text: 'Vamos a terreno y volvemos con cambios cada semana.' },
+  { icon: icons.shield, title: 'Rigor de equipo grande', text: 'ISO/IEC 29110, pruebas automáticas y cada cambio revisado.' },
+  { icon: icons.layers, title: 'Una plataforma, muchas empresas', text: 'Cada operador con sus datos aislados y sus permisos.' },
+  { icon: icons.cloud, title: 'En la nube o en tus servidores', text: 'Corre donde lo exija tu operación.' },
 ];
 ---
 
@@ -130,6 +168,10 @@ const differences = [
       <div class="motivation">
         <div class="motivation-copy">
           {motivation.map((p) => <p>{p}</p>)}
+          <h3 class="goals-title">Al terminar el programa esperamos tener</h3>
+          <ol class="goals">
+            {goals.map((g) => <li>{g}</li>)}
+          </ol>
         </div>
         <div class="gaps">
           {
@@ -151,15 +193,35 @@ const differences = [
     <div class="container">
       <SectionHeader kicker="Lo que ya sabemos hacer" title="Software que ya usan personas reales, todos los días.">
         <p class="lead">
-          Trabajamos como ingenieros de software: uno en una empresa de software y otro en una importadora de la región. No
-          llegamos con una idea en blanco.
+          Somos tres ingenieros de software: uno desarrolla soluciones logísticas en una importadora de ZOFRI, otro lidera
+          desarrollo en una empresa de software y el tercero lleva sistemas de alta disponibilidad a producción. No llegamos
+          con una idea en blanco.
         </p>
       </SectionHeader>
       <div class="lines">
         {
           capabilities.map((c) => (
-            <article class="card line">
-              <span class="tag mono">{c.who}</span>
+            <article
+              class:list={['card', 'line', 'by', { joint: c.by.length > 1 }]}
+              style={c.by.length === 1 ? memberVars(byInitials(c.by[0]).color) : undefined}
+            >
+              <div class="who">
+                <span class="dots" aria-hidden="true">
+                  {c.by.map((i) => {
+                    const m = byInitials(i);
+                    return m.photo ? (
+                      <Image class="dot photo" style={memberVars(m.color)} src={m.photo} alt="" width={60} height={60} />
+                    ) : (
+                      <span class="dot mono" style={memberVars(m.color)}>
+                        {i}
+                      </span>
+                    );
+                  })}
+                </span>
+                <span class="who-text">
+                  {c.by.length === 1 ? `${firstName(c.by[0])} · ${c.kind.toLowerCase()}` : c.kind}
+                </span>
+              </div>
               <h3>{c.title}</h3>
               <p class="cap-text">{c.text}</p>
             </article>
@@ -179,7 +241,7 @@ const differences = [
         }
       </div>
       <p class="source mono">Conteo en el repositorio al {lmsStats.countedAt}.</p>
-      <a class="btn btn-primary more" href="/metodo">Ver el método con evidencia real →</a>
+      <a class="btn btn-primary more" href="/por-dentro">Abre por dentro la plataforma que llevaremos al desafío →</a>
     </div>
   </section>
 
@@ -248,6 +310,19 @@ const differences = [
         {
           differences.map((d) => (
             <div class="guarantee">
+              <span class="g-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="32"
+                  height="32"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  set:html={d.icon}
+                />
+              </span>
               <h4>{d.title}</h4>
               <p>{d.text}</p>
             </div>
@@ -288,7 +363,7 @@ const differences = [
                 <span class="go">¿Quieres sumarte? Únete al equipo →</span>
               </a>
             ) : (
-              <article class="card member">
+              <article class="card member" style={memberVars(m.color)}>
                 {m.photo ? (
                   <Image class="avatar photo" src={m.photo} alt={m.name} width={112} height={112} />
                 ) : (
@@ -493,14 +568,59 @@ const differences = [
     flex-direction: column;
     gap: 14px;
   }
-  .tag {
-    align-self: flex-start;
-    font-size: 12px;
+  /* Colores por integrante: cada tarjeta toma --m (ver memberVars en src/data/site.ts). */
+  .line.by {
+    border-top: 4px solid var(--m);
+  }
+  .line.joint {
+    border-top: 0;
+    background-image: linear-gradient(90deg, var(--m-amber) 33.3%, var(--m-violet) 33.3% 66.6%, var(--m-blue) 66.6%);
+    background-size: 100% 4px;
+    background-repeat: no-repeat;
+  }
+  .who {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .dots {
+    display: flex;
+  }
+  .dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
     font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 999px;
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--m);
+    color: var(--m-on);
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--m);
+  }
+  .dot.photo {
+    object-fit: cover;
+  }
+  .dot + .dot {
+    margin-left: 4px;
+  }
+  .who-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+  }
+  .member[style] {
+    border-top: 4px solid var(--m);
+  }
+  .member[style] .avatar {
+    background: var(--m);
+    color: var(--m-on);
+  }
+  .member[style] .avatar.photo {
+    box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--m);
+  }
+  .member[style] .role {
+    color: var(--m);
   }
   .line h3 {
     font-size: 22px;
@@ -570,6 +690,16 @@ const differences = [
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
     gap: 24px;
+  }
+  .g-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 14px;
+    border-radius: var(--radius);
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: var(--accent);
   }
   .guarantee h4 {
     margin: 0 0 6px;
@@ -753,6 +883,9 @@ const differences = [
     align-items: center;
     gap: 8px;
   }
+  .gh.in svg {
+    flex-shrink: 0;
+  }
 
   /* CONTACTO */
   .contact {
@@ -801,6 +934,23 @@ const differences = [
     color: var(--ink-2);
     max-width: 62ch;
   }
+  .goals-title {
+    margin: 8px 0 0;
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .goals {
+    margin: 0;
+    padding-left: 1.4em;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 17px;
+  }
+  .goals li::marker {
+    color: var(--accent);
+    font-weight: 700;
+  }
   .motivation .gaps {
     grid-template-columns: 1fr;
   }
@@ -811,7 +961,7 @@ const differences = [
   }
 
   /* GUÍA PARA CLIENTES: mapa de flujo, vertical en móvil y horizontal desde 900px
-     (mismo diseño que la línea de flujo de /metodo). */
+     (mismo diseño que la línea de flujo de /por-dentro). */
   .gflow {
     list-style: none;
     margin: 0;
